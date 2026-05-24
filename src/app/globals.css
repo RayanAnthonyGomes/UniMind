@@ -262,3 +262,9 @@
   .animate-slide-in { animation: var(--animate-slide-in); }
   .text-balance     { text-wrap: balance; }
 }
+
+/* Add at the very bottom of globals.css */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
