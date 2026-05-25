@@ -50,6 +50,7 @@ export interface Task {
   priority: "low" | "medium" | "high";
   ai_generated: boolean;
   created_at: string;
+  description?: string;
 }
 
 export interface Grade {
@@ -77,3 +78,5 @@ export interface ChatMessage {
 export type Priority   = "low" | "medium" | "high";
 export type TaskStatus = "pending" | "in_progress" | "done";
 export type TaskType   = "homework" | "assignment" | "lab_report" | "presentation" | "quiz" | "other";
+
+//.. Gemini bolse 
