@@ -24,6 +24,8 @@ export interface Course {
   semester: number;
   syllabus_url?: string;
   created_at: string;
+  course_code?: string; // <-- Add this
+  color?: string;       // <-- Add this
 }
 
 export interface Document {
