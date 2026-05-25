@@ -61,6 +61,7 @@ export interface Grade {
   midterm_mark?: number;
   final_mark?: number;
   sgpa?: number;
+  attendance?: number;
   created_at: string;
 }
 
