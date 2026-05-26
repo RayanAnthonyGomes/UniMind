@@ -87,7 +87,27 @@ export async function POST(request: Request) {
       console.error("Resend error:", error);
       return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
     }
+    // Inside send-verification route — after sending email
+// Seed a welcome notification via Supabase service role
+const { createClient: createServiceClient } = await import("@supabase/supabase-js");
+const adminSupabase = createServiceClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
+// Find user by email
+const { data: { users } } = await adminSupabase.auth.admin.listUsers();
+const newUser = users.find((u) => u.email === email);
+
+if (newUser) {
+  await adminSupabase.from("notifications").insert({
+    user_id: newUser.id,
+    title:   "Welcome to UNIMIND! 🎉",
+    body:    `Hey ${firstName}! Your account is ready. Start by adding your courses for this semester.`,
+    type:    "system",
+    link:    "/courses",
+  });
+}
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Send verification error:", err);
