@@ -59,8 +59,8 @@ export async function POST() {
     });
 
     const { error } = await resend.emails.send({
-      from:    "UNIMIND <onboarding@resend.dev>",
-      to:      user.email!,
+      from:    "UNIMIND <noreply@mail.ryangomes.space>",
+      to: process.env.NODE_ENV === "production" ? user.email! : process.env.RESEND_TEST_EMAIL!,
       subject: `⏰ You have ${tasks.length} deadline${tasks.length > 1 ? "s" : ""} coming up — UNIMIND`,
       html,
     });

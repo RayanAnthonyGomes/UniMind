@@ -13,8 +13,8 @@ export async function POST(request: Request) {
     }
 
     const { error } = await resend.emails.send({
-      from:    "UNIMIND <onboarding@resend.dev>",
-      to:      email,
+      from:    "UNIMIND <noreply@mail.ryangomes.space>",
+      to: process.env.NODE_ENV === "production" ? email : process.env.RESEND_TEST_EMAIL!,
       subject: "Welcome to UNIMIND — Verify your email 🎓",
       html: `
         <!DOCTYPE html>

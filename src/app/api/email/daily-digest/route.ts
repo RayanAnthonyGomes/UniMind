@@ -64,8 +64,8 @@ export async function POST() {
     });
 
     const { error } = await resend.emails.send({
-      from:    "UNIMIND <onboarding@resend.dev>",
-      to:      user.email!,
+      from:    "UNIMIND <noreply@mail.ryangomes.space>",
+      to: process.env.NODE_ENV === "production" ? user.email! : process.env.RESEND_TEST_EMAIL!,
       subject: `📚 Your UNIMIND Daily Digest — ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}`,
       html,
     });
