@@ -1,6 +1,6 @@
 // src/components/courses/CourseChat.tsx
 "use client";
-
+import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2, BookOpen } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -199,7 +199,8 @@ export default function CourseChat({
               fontSize: "0.875rem", lineHeight: 1.6,
               whiteSpace: "pre-wrap",
             }}>
-              {msg.content}
+              {/* {msg.content} */} 
+              <MarkdownRenderer content={msg.content} />
             </div>
           </div>
         ))}

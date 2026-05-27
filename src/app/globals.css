@@ -274,3 +274,31 @@
   0%, 100% { opacity: 0.3; transform: scale(0.8); }
   50%       { opacity: 1;   transform: scale(1.1); }
 }
+/* Add at the bottom of globals.css */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+/* ── MOBILE RESPONSIVE ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .desktop-sidebar   { display: none !important; }
+  .mobile-menu-btn   { display: flex !important; }
+  .mobile-overlay    { display: block !important; }
+  .mobile-drawer     { display: flex !important; }
+
+  main {
+    padding: 1rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Stack grade table on mobile */
+  .grades-table-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stack dashboard cards */
+  .dashboard-cards {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}

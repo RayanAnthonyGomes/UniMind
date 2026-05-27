@@ -1,6 +1,6 @@
 // src/components/ai/AIAssistantClient.tsx
 "use client";
-
+import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Send, Bot, User, Loader2, Sparkles,
@@ -558,7 +558,7 @@ export default function AIAssistantClient({
                           {msg.content}
                         </p>
                       ) : (
-                        <div>{formatContent(msg.content)}</div>
+                        <MarkdownRenderer content={msg.content} />
                       )}
 
                       {/* Copy button for assistant */}

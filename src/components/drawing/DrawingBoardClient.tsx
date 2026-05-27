@@ -269,30 +269,100 @@ export default function DrawingBoardClient({
   }
 
   // ── Solve with AI ──────────────────────────────────────────
-  async function solveWithAI() {
-    if (!hasDrawing) { toast.error("Draw something first!"); return; }
-    setSolving(true);
-    setSolution(null);
+// In DrawingBoardClient.tsx — replace the solveWithAI function:
 
-    const canvas  = canvasRef.current!;
-    const dataUrl = canvas.toDataURL("image/png");
+async function solveWithAI() {
+  if (!hasDrawing) { toast.error("Draw something first!"); return; }
+  setSolving(true);
+  setSolution(null);
 
-    try {
-      const res = await fetch("/api/ai/solve-drawing", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ image: dataUrl, userId }),
-      });
+  const canvas  = canvasRef.current!;
+  const dataUrl = canvas.toDataURL("image/png");
 
-      if (!res.ok) throw new Error("API error");
-      const data = await res.json();
-      setSolution(data.solution ?? "Could not analyze the drawing.");
-    } catch {
-      toast.error("AI solving failed. Please try again.");
-    } finally {
-      setSolving(false);
+  try {
+    const res = await fetch("/api/ai/solve-drawing", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ image: dataUrl, userId }),
+    });
+
+    if (!res.ok) throw new Error("API error");
+    const data     = await res.json();
+    const solution = data.solution ?? "Could not analyze the drawing.";
+    setSolution(solution);
+
+    // ── Write short answer directly on canvas ──────────────
+    const shortAnswer = extractShortAnswer(solution);
+    if (shortAnswer) {
+      writeOnCanvas(shortAnswer);
+    }
+
+  } catch {
+    toast.error("AI solving failed. Please try again.");
+  } finally {
+    setSolving(false);
+  }
+}
+
+// Extract a short answer from the full solution
+function extractShortAnswer(solution: string): string | null {
+  // Look for patterns like "x = 5", "= 42", "Answer: 3.14"
+  const patterns = [
+    /(?:final answer|answer|result|therefore|∴)[:\s]+([^\n.]+)/i,
+    /([a-z]\s*=\s*[-\d./]+)/i,
+    /=\s*([-\d./]+)\s*$/m,
+  ];
+
+  for (const pattern of patterns) {
+    const match = solution.match(pattern);
+    if (match?.[1]) {
+      return match[1].trim().slice(0, 40); // max 40 chars
     }
   }
+  return null;
+}
+
+// Write text on the canvas at the bottom-right of drawn content
+function writeOnCanvas(text: string) {
+  const canvas = canvasRef.current!;
+  const ctx    = ctxRef.current!;
+
+  // Find the bottom of drawn content by scanning pixels
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels    = imageData.data;
+  let   lowestY   = 100; // start from top + some padding
+
+  for (let y = canvas.height - 1; y >= 0; y--) {
+    let rowHasContent = false;
+    for (let x = 0; x < canvas.width; x++) {
+      const idx = (y * canvas.width + x) * 4;
+      // Check if pixel is not white
+      if (pixels[idx]! < 250 || pixels[idx + 1]! < 250 || pixels[idx + 2]! < 250) {
+        rowHasContent = true;
+        break;
+      }
+    }
+    if (rowHasContent) {
+      lowestY = y;
+      break;
+    }
+  }
+
+  // Write the answer below the drawing
+  const writeY  = Math.min(lowestY + 48, canvas.height - 20);
+  const writeX  = 40;
+
+  ctx.save();
+  ctx.font         = "bold 28px Inter, system-ui, sans-serif";
+  ctx.fillStyle    = "#4f46e5"; // primary indigo
+  ctx.strokeStyle  = "white";
+  ctx.lineWidth    = 4;
+
+  // White outline for readability
+  ctx.strokeText(`= ${text}`, writeX, writeY);
+  ctx.fillText(`= ${text}`, writeX, writeY);
+  ctx.restore();
+}
 
   // ── Save session ───────────────────────────────────────────
   async function saveSession() {
