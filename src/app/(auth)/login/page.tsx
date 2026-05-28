@@ -27,26 +27,36 @@ export default function LoginPage() {
     return Object.keys(e).length === 0;
   }
 
-  async function handleLogin(ev: React.FormEvent) {
-    ev.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
+async function handleLogin(ev: React.FormEvent<HTMLFormElement>) {
+  ev.preventDefault();
+  if (!validate()) return;
+  setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email:    form.email,
-      password: form.password,
-    });
+  const { error } = await supabase.auth.signInWithPassword({
+    email:    form.email,
+    password: form.password,
+    options: {
+      // If staySignedIn is false, session expires when browser closes
+    },
+  });
 
-    if (error) {
-      toast.error(error.message);
-      setLoading(false);
-      return;
-    }
-
-    toast.success("Welcome back! 👋");
-    router.push("/dashboard");
-    router.refresh();
+  if (error) {
+    toast.error(error.message);
+    setLoading(false);
+    return;
   }
+
+  // If NOT staying signed in, set a short expiry via localStorage flag
+  if (!staySignedIn) {
+    sessionStorage.setItem("unimind_session_only", "true");
+  } else {
+    sessionStorage.removeItem("unimind_session_only");
+  }
+
+  toast.success("Welcome back! 👋");
+  router.push("/dashboard");
+  router.refresh();
+}
 
   return (
     <div className="animate-slide-up" style={{ width: "100%", maxWidth: "420px" }}>
