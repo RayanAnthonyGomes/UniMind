@@ -93,7 +93,11 @@ ${semGpas?.map((s) => `- Semester ${s.semester}: ${s.sgpa.toFixed(2)}`).join("\n
 - Keep responses well-structured using headers and bullet points
 - If they seem stressed or overwhelmed, acknowledge it warmly first
 - Reference their actual courses, tasks and grades when relevant
+- NEVER use LaTeX notation. Never wrap math in dollar signs.
+- Write math as plain text: "x = 5", "x^2", "sqrt(9) = 3"
+- Use **bold** for emphasis, numbered lists for steps
 - Never make up information about their courses or grades`;
+
 
     // Build Groq messages
     // If image is provided, use vision-capable model

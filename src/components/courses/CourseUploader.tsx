@@ -33,68 +33,94 @@ export default function CourseUploader({
 
   const currentType = DOC_TYPES.find((t) => t.value === selectedType)!;
 
-  async function uploadFile(file: File) {
-    if (!file) return;
+ // src/components/courses/CourseUploader.tsx
+// Replace the entire uploadFile function:
 
-    // Validate size (20MB max)
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("File too large. Maximum size is 20MB.");
-      return;
-    }
+async function uploadFile(file: File) {
+  if (!file) return;
 
-    setUploading(true);
-    setProgress(20);
-
-    const ext      = file.name.split(".").pop();
-    const filePath = `${userId}/${courseId}/${Date.now()}-${file.name}`;
-
-    setProgress(40);
-
-    // Upload to Supabase Storage
-    const { error: uploadError } = await supabase.storage
-      .from("unimind-files")
-      .upload(filePath, file, { upsert: false });
-
-    if (uploadError) {
-      toast.error(`Upload failed: ${uploadError.message}`);
-      setUploading(false);
-      setProgress(0);
-      return;
-    }
-
-    setProgress(70);
-
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from("unimind-files")
-      .getPublicUrl(filePath);
-
-    // Save document record
-    const { error: dbError } = await supabase.from("documents").insert({
-      user_id:   userId,
-      course_id: courseId,
-      name:      file.name,
-      type:      selectedType,
-      url:       publicUrl,
-      size:      file.size,
-    });
-
-    if (dbError) {
-      toast.error("Failed to save file info.");
-      setUploading(false);
-      setProgress(0);
-      return;
-    }
-
-    setProgress(100);
-    toast.success(`"${file.name}" uploaded! 📄`);
-
-    setTimeout(() => {
-      setUploading(false);
-      setProgress(0);
-      router.refresh();
-    }, 500);
+  if (file.size > 20 * 1024 * 1024) {
+    toast.error("File too large. Maximum size is 20MB.");
+    return;
   }
+
+  setUploading(true);
+  setProgress(20);
+
+  const filePath = `${userId}/${courseId}/${Date.now()}-${file.name}`;
+
+  // Upload to Supabase Storage
+  const { error: uploadError } = await supabase.storage
+    .from("unimind-files")
+    .upload(filePath, file, { upsert: false });
+
+  if (uploadError) {
+    toast.error(`Upload failed: ${uploadError.message}`);
+    setUploading(false);
+    setProgress(0);
+    return;
+  }
+
+  setProgress(50);
+
+  // Get URL — use getPublicUrl for public bucket
+  // or createSignedUrl for private bucket
+  const { data: { publicUrl } } = supabase.storage
+    .from("unimind-files")
+    .getPublicUrl(filePath);
+
+  setProgress(65);
+
+  // Extract text server-side
+  let extractedContent = "";
+  try {
+    const extractRes = await fetch("/api/documents/extract", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ url: publicUrl, type: selectedType }),
+    });
+    if (extractRes.ok) {
+      const extractData  = await extractRes.json();
+      extractedContent   = extractData.content ?? "";
+    }
+  } catch (e) {
+    console.error("Text extraction failed:", e);
+    // Continue without text — not a fatal error
+  }
+
+  setProgress(80);
+
+  // Save document record with extracted content
+  const { error: dbError } = await supabase.from("documents").insert({
+    user_id:   userId,
+    course_id: courseId,
+    name:      file.name,
+    type:      selectedType,
+    url:       publicUrl,
+    size:      file.size,
+    content:   extractedContent || null,
+  });
+
+  if (dbError) {
+    toast.error("Failed to save file info.");
+    setUploading(false);
+    setProgress(0);
+    return;
+  }
+
+  setProgress(100);
+
+  const msg = extractedContent
+    ? `"${file.name}" uploaded & indexed! AI can now read it. 📄`
+    : `"${file.name}" uploaded! 📄`;
+  toast.success(msg);
+
+  setTimeout(() => {
+    setUploading(false);
+    setProgress(0);
+    router.refresh();
+  }, 500);
+}
 
   function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;

@@ -36,40 +36,44 @@ export default async function DashboardPage() {
   const greeting = getGreeting(profile.first_name);
 
   // Build summary cards data
-  const cards = [
-    {
-      label:    "Active Courses",
-      value:    courses?.length ?? 0,
-      icon:     <BookOpen size={20} />,
-      color:    "var(--color-primary-600)",
-      bg:       "var(--color-primary-50)",
-      sub:      "This semester",
-    },
-    {
-      label:    "Files Uploaded",
-      value:    documents?.length ?? 0,
-      icon:     <FileText size={20} />,
-      color:    "#0ea5e9",
-      bg:       "#f0f9ff",
-      sub:      "PDFs, PPTs, notes",
-    },
-    {
-      label:    "Pending Tasks",
-      value:    tasks?.length ?? 0,
-      icon:     <CheckSquare size={20} />,
-      color:    "#f59e0b",
-      bg:       "#fffbeb",
-      sub:      "Due soon",
-    },
-    {
-      label:    "Current CGPA",
-      value:    profile.current_cgpa?.toFixed(2) ?? "0.00",
-      icon:     <TrendingUp size={20} />,
-      color:    "#22c55e",
-      bg:       "#f0fdf4",
-      sub:      `${semesterGpas?.length ?? 0} semesters tracked`,
-    },
-  ];
+const cards = [
+  {
+    label: "Active Courses",
+    value: courses?.length ?? 0,
+    icon:  <BookOpen size={20} />,
+    color: "var(--color-primary-600)",
+    bg:    "var(--color-primary-50)",
+    sub:   "This semester",
+    href:  "/courses",
+  },
+  {
+    label: "Files Uploaded",
+    value: documents?.length ?? 0,
+    icon:  <FileText size={20} />,
+    color: "#0ea5e9",
+    bg:    "#f0f9ff",
+    sub:   "PDFs, PPTs, notes",
+    href:  "/courses",
+  },
+  {
+    label: "Pending Tasks",
+    value: tasks?.length ?? 0,
+    icon:  <CheckSquare size={20} />,
+    color: "#f59e0b",
+    bg:    "#fffbeb",
+    sub:   "Due soon",
+    href:  "/tasks",
+  },
+  {
+    label: "Current CGPA",
+    value: profile.current_cgpa?.toFixed(2) ?? "0.00",
+    icon:  <TrendingUp size={20} />,
+    color: "#22c55e",
+    bg:    "#f0fdf4",
+    sub:   `${semesterGpas?.length ?? 0} semesters tracked`,
+    href:  "/grades",
+  },
+];
 
   // Categorise pending tasks
   const overdue   = tasks?.filter((t) => t.due_date && new Date(t.due_date) < new Date()) ?? [];
