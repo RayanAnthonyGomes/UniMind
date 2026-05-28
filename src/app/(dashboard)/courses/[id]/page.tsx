@@ -35,11 +35,11 @@ export default async function CourseDetailPage({ params }: Props) {
 
   if (!course) notFound();
 
-  const { data: documents } = await supabase
-    .from("documents")
-    .select("*")
-    .eq("course_id", id)
-    .order("created_at", { ascending: false });
+const { data: documents } = await supabase
+  .from("documents")
+  .select("id, course_id, user_id, name, type, url, size, content, created_at")
+  .eq("course_id", id)
+  .order("created_at", { ascending: false });
 
   return (
     <div className="animate-fade-in" style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>

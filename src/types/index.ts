@@ -29,16 +29,16 @@ export interface Course {
 }
 
 export interface Document {
-  id: string;
-  course_id: string;
-  user_id: string;
-  name: string;
-  type: "pdf" | "ppt" | "note" | "obe";
-  url: string;
-  size: number;
+  id:         string;
+  course_id:  string;
+  user_id:    string;
+  name:       string;
+  type:       "pdf" | "ppt" | "note" | "obe";
+  url:        string;
+  size:       number;
+  content?:   string | null;   // ← add this
   created_at: string;
 }
-
 export interface Task {
   id: string;
   user_id: string;
@@ -79,4 +79,4 @@ export type Priority   = "low" | "medium" | "high";
 export type TaskStatus = "pending" | "in_progress" | "done";
 export type TaskType   = "homework" | "assignment" | "lab_report" | "presentation" | "quiz" | "other";
 
-//.. Gemini bolse 
+
