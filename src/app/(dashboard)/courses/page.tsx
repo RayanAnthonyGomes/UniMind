@@ -1,4 +1,4 @@
-// src/app/(dashboard)/courses/page.tsx
+// // src/app/(dashboard)/courses/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -118,3 +118,68 @@ export default async function CoursesPage() {
     </div>
   );
 }
+
+// // src/app/(dashboard)/courses/[id]/page.tsx
+// import { createClient } from "@/lib/supabase/server";
+// import { redirect, notFound } from "next/navigation";
+// import CourseHeader    from "@/components/courses/CourseHeader";
+// import CourseUploader  from "@/components/courses/CourseUploader";
+// import CourseDocuments from "@/components/courses/CourseDocuments";
+// import CourseChat      from "@/components/courses/CourseChat";
+// import LectureList     from "@/components/lectures/LectureList";
+
+// interface Props {
+//   params: Promise<{ id: string }>;
+// }
+
+// export async function generateMetadata({ params }: Props) {
+//   const { id }   = await params;
+//   const supabase = await createClient();
+//   const { data } = await supabase.from("courses").select("name").eq("id", id).single();
+//   return { title: data?.name ?? "Course" };
+// }
+
+// export default async function CourseDetailPage({ params }: Props) {
+//   const { id }   = await params;
+//   const supabase = await createClient();
+
+//   const { data: { user } } = await supabase.auth.getUser();
+//   if (!user) redirect("/login");
+
+//   const [
+//     { data: course    },
+//     { data: documents },
+//     { data: lectures  },
+//   ] = await Promise.all([
+//     supabase.from("courses").select("*").eq("id", id).eq("user_id", user.id).single(),
+//     supabase.from("documents").select("*").eq("course_id", id).order("created_at", { ascending: false }),
+//     supabase.from("lectures").select("*").eq("course_id", id).eq("user_id", user.id).order("created_at", { ascending: false }),
+//   ]);
+
+//   if (!course) notFound();
+
+//   return (
+//     <div className="animate-fade-in" style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
+
+//       <CourseHeader course={course} documentCount={documents?.length ?? 0} />
+
+//       {/* Three column layout */}
+//       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.75rem", alignItems: "start" }}>
+
+//         {/* Left col: upload + documents + lectures */}
+//         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+//           <CourseUploader  courseId={id} userId={user.id} />
+//           <CourseDocuments documents={documents ?? []} courseId={id} userId={user.id} />
+//           <LectureList
+//             lectures={lectures ?? []}
+//             course={{ id, name: course.name, color: course.color }}
+//             userId={user.id}
+//           />
+//         </div>
+
+//         {/* Right col: course AI chat */}
+//         <CourseChat courseId={id} userId={user.id} courseName={course.name} />
+//       </div>
+//     </div>
+//   );
+// }
