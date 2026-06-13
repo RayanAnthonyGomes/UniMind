@@ -10,6 +10,7 @@ import {
   Eye, EyeOff, Loader2, ChevronRight,
   ChevronLeft, User, GraduationCap, BookOpen,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ── Degree options ──────────────────────────────────────────
 const DEGREE_OPTIONS = [
@@ -41,28 +42,32 @@ const DEGREE_OPTIONS = [
 ];
 
 interface FormData {
-  // Step 1
   first_name: string;
   last_name: string;
   phone: string;
   email: string;
   password: string;
   confirm_password: string;
-  // Step 2
   university_name: string;
   degree_program: string;
   degree_search: string;
   current_semester: string;
   completed_semesters: string;
-  // Step 3 — dynamic SGPA fields
   semester_gpas: string[];
 }
+
+const stepSlide = {
+  initial: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
+  animate: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
+};
 
 export default function RegisterPage() {
   const router = useRouter();
   const supabase = createClient();
 
   const [step, setStep] = useState(1);
+  const [direction, setDirection] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -77,13 +82,11 @@ export default function RegisterPage() {
     semester_gpas: [],
   });
 
-  // ── Field updater ─────────────────────────────────────────
   function set(field: keyof FormData, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
   }
 
-  // ── When completed_semesters changes, resize the gpas array ─
   function handleCompletedChange(val: string) {
     set("completed_semesters", val);
     const n = parseInt(val) || 0;
@@ -131,11 +134,16 @@ export default function RegisterPage() {
     return Object.keys(e).length === 0;
   }
 
-  // ── Step navigation ───────────────────────────────────────
   function nextStep() {
     if (step === 1 && !validateStep1()) return;
     if (step === 2 && !validateStep2()) return;
+    setDirection(1);
     setStep((s) => s + 1);
+  }
+
+  function prevStep() {
+    setDirection(-1);
+    setStep((s) => s - 1);
   }
 
   // ── Submit ────────────────────────────────────────────────
@@ -145,11 +153,9 @@ export default function RegisterPage() {
     if (completed > 0 && !validateStep3()) return;
     setLoading(true);
 
-    // Calculate current CGPA from entered SGPAs
     const gpas = form.semester_gpas.map((g) => parseFloat(g)).filter(Boolean);
     const cgpa = gpas.length ? gpas.reduce((a, b) => a + b, 0) / gpas.length : 0;
 
-    // Sign up with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email:    form.email,
       password: form.password,
@@ -168,7 +174,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Update profile with full details
     if (data.user) {
       const { error: profileError } = await supabase
         .from("profiles")
@@ -184,7 +189,6 @@ export default function RegisterPage() {
 
       if (profileError) console.error("Profile update error:", profileError);
 
-      // Insert semester GPAs
       if (gpas.length > 0) {
         const gpaRows = form.semester_gpas.map((g, i) => ({
           user_id:  data.user!.id,
@@ -194,7 +198,6 @@ export default function RegisterPage() {
         await supabase.from("semester_gpas").insert(gpaRows);
       }
 
-      // Send verification email via our API route
       await fetch("/api/auth/send-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -209,12 +212,10 @@ export default function RegisterPage() {
     router.push("/verify-email");
   }
 
-  // ── Filtered degree list ──────────────────────────────────
   const filteredDegrees = DEGREE_OPTIONS.filter((d) =>
     d.toLowerCase().includes(form.degree_search.toLowerCase())
   );
 
-  // ── Step indicator ────────────────────────────────────────
   const steps = [
     { n: 1, label: "Personal", icon: <User size={14} /> },
     { n: 2, label: "University", icon: <GraduationCap size={14} /> },
@@ -222,293 +223,452 @@ export default function RegisterPage() {
   ];
 
   return (
-    <div className="animate-slide-up" style={{ width: "100%", maxWidth: "480px" }}>
-      <div className="clay-card" style={{ padding: "2.5rem" }}>
+    <motion.div
+      initial={{ opacity: 0, y: 30, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.6, type: "spring", stiffness: 90, damping: 18 }}
+      style={{ width: "100%", maxWidth: "480px" }}
+    >
+      <div className="glass-card" style={{ padding: "2.5rem" }}>
 
         {/* Step indicator */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "2rem", gap: "0" }}>
           {steps.map((s, i) => (
             <div key={s.n} style={{ display: "flex", alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
-                <div style={{
-                  width: "36px", height: "36px", borderRadius: "50%",
-                  background: step >= s.n ? "var(--color-primary-600)" : "var(--color-surface-200)",
-                  color: step >= s.n ? "white" : "#a8a29e",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontWeight: 600, fontSize: "0.8rem",
-                  transition: "all 0.3s ease",
-                }}>
+                <motion.div
+                  animate={{
+                    background: step >= s.n
+                      ? "linear-gradient(135deg, #7c3aed, #6366f1)"
+                      : "rgba(255, 255, 255, 0.06)",
+                    boxShadow: step >= s.n
+                      ? "0 0 20px -3px rgba(124, 58, 237, 0.4)"
+                      : "none",
+                  }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    color: step >= s.n ? "white" : "var(--color-text-muted)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 600,
+                    fontSize: "0.8rem",
+                    border: step >= s.n ? "none" : "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
                   {step > s.n ? "✓" : s.n}
-                </div>
-                <span style={{ fontSize: "0.7rem", color: step >= s.n ? "var(--color-primary-600)" : "#a8a29e", fontWeight: 500 }}>
+                </motion.div>
+                <span style={{
+                  fontSize: "0.7rem",
+                  color: step >= s.n ? "var(--color-primary-300)" : "var(--color-text-muted)",
+                  fontWeight: 500,
+                }}>
                   {s.label}
                 </span>
               </div>
               {i < steps.length - 1 && (
-                <div style={{
-                  width: "60px", height: "2px", marginBottom: "1rem",
-                  background: step > s.n ? "var(--color-primary-400)" : "var(--color-surface-200)",
-                  transition: "all 0.3s ease",
-                }} />
+                <div style={{ position: "relative", width: "60px", height: "2px", marginBottom: "1rem" }}>
+                  <div style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(255, 255, 255, 0.06)",
+                    borderRadius: "999px",
+                  }} />
+                  <motion.div
+                    animate={{ width: step > s.n ? "100%" : "0%" }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      height: "100%",
+                      background: "linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400))",
+                      borderRadius: "999px",
+                      boxShadow: "0 0 8px rgba(124, 58, 237, 0.4)",
+                    }}
+                  />
+                </div>
               )}
             </div>
           ))}
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
+          <AnimatePresence mode="wait" custom={direction}>
 
-          {/* ── STEP 1: Personal Info ── */}
-          {step === 1 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}>
-              <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
-                <h2 style={{ fontSize: "1.375rem", fontWeight: 700, color: "#1c1917" }}>Personal Information</h2>
-                <p style={{ color: "#78716c", fontSize: "0.875rem" }}>Let's start with the basics</p>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
-                <Field label="First Name" error={errors.first_name}>
-                  <input className="clay-input" placeholder="Rahim" value={form.first_name}
-                    onChange={(e) => set("first_name", e.target.value)} autoComplete="given-name" />
-                </Field>
-                <Field label="Last Name" error={errors.last_name}>
-                  <input className="clay-input" placeholder="Chowdhury" value={form.last_name}
-                    onChange={(e) => set("last_name", e.target.value)} autoComplete="family-name" />
-                </Field>
-              </div>
-
-              <Field label="Phone Number (optional)">
-                <input className="clay-input" placeholder="+880 1XXX XXXXXX" value={form.phone}
-                  onChange={(e) => set("phone", e.target.value)} autoComplete="tel" type="tel" />
-              </Field>
-
-              <Field label="Email Address" error={errors.email}>
-                <input className="clay-input" placeholder="you@university.edu" value={form.email}
-                  onChange={(e) => set("email", e.target.value)} autoComplete="email" type="email" />
-              </Field>
-
-              <Field label="Password" error={errors.password}>
-                <div style={{ position: "relative" }}>
-                  <input className="clay-input" placeholder="Minimum 8 characters"
-                    type={showPassword ? "text" : "password"}
-                    value={form.password} onChange={(e) => set("password", e.target.value)}
-                    style={{ paddingRight: "3rem" }} autoComplete="new-password" />
-                  <ToggleEye show={showPassword} onToggle={() => setShowPassword(!showPassword)} />
+            {/* ── STEP 1: Personal Info ── */}
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                custom={direction}
+                variants={stepSlide}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}
+              >
+                <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
+                  <h2 style={{ fontSize: "1.375rem", fontWeight: 700, color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>
+                    Personal Information
+                  </h2>
+                  <p style={{ color: "var(--color-text-muted)", fontSize: "0.875rem" }}>Let&apos;s start with the basics</p>
                 </div>
-              </Field>
 
-              <Field label="Confirm Password" error={errors.confirm_password}>
-                <div style={{ position: "relative" }}>
-                  <input className="clay-input" placeholder="Repeat your password"
-                    type={showConfirm ? "text" : "password"}
-                    value={form.confirm_password} onChange={(e) => set("confirm_password", e.target.value)}
-                    style={{ paddingRight: "3rem" }} autoComplete="new-password" />
-                  <ToggleEye show={showConfirm} onToggle={() => setShowConfirm(!showConfirm)} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
+                  <Field label="First Name" error={errors.first_name}>
+                    <input className="clay-input" placeholder="Rayan" value={form.first_name}
+                      onChange={(e) => set("first_name", e.target.value)} autoComplete="given-name" />
+                  </Field>
+                  <Field label="Last Name" error={errors.last_name}>
+                    <input className="clay-input" placeholder="Chuntu" value={form.last_name}
+                      onChange={(e) => set("last_name", e.target.value)} autoComplete="family-name" />
+                  </Field>
                 </div>
-              </Field>
 
-              <button type="button" className="btn-primary"
-                style={{ width: "100%", padding: "0.75rem", marginTop: "0.5rem" }}
-                onClick={nextStep}>
-                Continue <ChevronRight size={16} />
-              </button>
+                <Field label="Phone Number (optional)">
+                  <input className="clay-input" placeholder="+880 1XXX XXXXXX" value={form.phone}
+                    onChange={(e) => set("phone", e.target.value)} autoComplete="tel" type="tel" />
+                </Field>
 
-              <p style={{ textAlign: "center", fontSize: "0.875rem", color: "#78716c" }}>
-                Already have an account?{" "}
-                <Link href="/login" style={{ color: "var(--color-primary-600)", fontWeight: 600, textDecoration: "none" }}>
-                  Sign in
-                </Link>
-              </p>
-            </div>
-          )}
+                <Field label="Email Address" error={errors.email}>
+                  <input className="clay-input" placeholder="you@university.edu" value={form.email}
+                    onChange={(e) => set("email", e.target.value)} autoComplete="email" type="email" />
+                </Field>
 
-          {/* ── STEP 2: University Info ── */}
-          {step === 2 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}>
-              <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
-                <h2 style={{ fontSize: "1.375rem", fontWeight: 700, color: "#1c1917" }}>University Information</h2>
-                <p style={{ color: "#78716c", fontSize: "0.875rem" }}>Tell us about your studies</p>
-              </div>
-
-              <Field label="University Name" error={errors.university_name}>
-                <input className="clay-input" placeholder="e.g. BRAC University"
-                  value={form.university_name} onChange={(e) => set("university_name", e.target.value)} />
-              </Field>
-
-              {/* Degree dropdown with search */}
-              <Field label="Degree Program" error={errors.degree_program}>
-                <div style={{ position: "relative" }}>
-                  <div
-                    className="clay-input"
-                    onClick={() => setDegreeOpen(!degreeOpen)}
-                    style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                  >
-                    <span style={{ color: form.degree_program ? "#1c1917" : "#a8a29e" }}>
-                      {form.degree_program || "Select your degree..."}
-                    </span>
-                    <ChevronRight size={14} style={{ transform: degreeOpen ? "rotate(90deg)" : "none", transition: "0.2s", color: "#a8a29e" }} />
+                <Field label="Password" error={errors.password}>
+                  <div style={{ position: "relative" }}>
+                    <input className="clay-input" placeholder="Minimum 8 characters"
+                      type={showPassword ? "text" : "password"}
+                      value={form.password} onChange={(e) => set("password", e.target.value)}
+                      style={{ paddingRight: "3rem" }} autoComplete="new-password" />
+                    <ToggleEye show={showPassword} onToggle={() => setShowPassword(!showPassword)} />
                   </div>
-
-                  {degreeOpen && (
-                    <div style={{
-                      position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 50,
-                      background: "white", borderRadius: "10px", border: "1px solid var(--color-surface-200)",
-                      boxShadow: "var(--shadow-clay-md)", overflow: "hidden",
-                    }}>
-                      <div style={{ padding: "0.5rem" }}>
-                        <input className="clay-input" placeholder="Search degrees..."
-                          value={form.degree_search}
-                          onChange={(e) => setForm((p) => ({ ...p, degree_search: e.target.value }))}
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ fontSize: "0.8125rem" }}
-                          autoFocus />
-                      </div>
-                      <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-                        {filteredDegrees.map((d) => (
-                          <div key={d}
-                            onClick={() => { set("degree_program", d); setDegreeOpen(false); setForm((p) => ({ ...p, degree_search: "" })); }}
-                            style={{
-                              padding: "0.625rem 1rem", cursor: "pointer", fontSize: "0.875rem",
-                              background: form.degree_program === d ? "var(--color-primary-50)" : "transparent",
-                              color: form.degree_program === d ? "var(--color-primary-700)" : "#44403c",
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-surface-100)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.background = form.degree_program === d ? "var(--color-primary-50)" : "transparent")}
-                          >
-                            {d}
-                          </div>
-                        ))}
-                        {filteredDegrees.length === 0 && (
-                          <p style={{ padding: "1rem", color: "#a8a29e", fontSize: "0.875rem", textAlign: "center" }}>
-                            No matches. Try different keywords.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </Field>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
-                <Field label="Current Semester" error={errors.current_semester}>
-                  <input className="clay-input" type="number" min={1} max={16} placeholder="e.g. 4"
-                    value={form.current_semester} onChange={(e) => set("current_semester", e.target.value)} />
                 </Field>
-                <Field label="Semesters Completed" error={errors.completed_semesters}>
-                  <input className="clay-input" type="number" min={0} max={16} placeholder="e.g. 3"
-                    value={form.completed_semesters} onChange={(e) => handleCompletedChange(e.target.value)} />
-                </Field>
-              </div>
 
-              <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
-                <button type="button" className="btn-secondary"
-                  style={{ flex: 1, padding: "0.75rem" }} onClick={() => setStep(1)}>
-                  <ChevronLeft size={16} /> Back
-                </button>
-                <button type="button" className="btn-primary"
-                  style={{ flex: 1, padding: "0.75rem" }} onClick={nextStep}>
+                <Field label="Confirm Password" error={errors.confirm_password}>
+                  <div style={{ position: "relative" }}>
+                    <input className="clay-input" placeholder="Repeat your password"
+                      type={showConfirm ? "text" : "password"}
+                      value={form.confirm_password} onChange={(e) => set("confirm_password", e.target.value)}
+                      style={{ paddingRight: "3rem" }} autoComplete="new-password" />
+                    <ToggleEye show={showConfirm} onToggle={() => setShowConfirm(!showConfirm)} />
+                  </div>
+                </Field>
+
+                <motion.button
+                  type="button"
+                  className="btn-primary"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{ width: "100%", padding: "0.75rem", marginTop: "0.5rem" }}
+                  onClick={nextStep}
+                >
                   Continue <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          )}
+                </motion.button>
 
-          {/* ── STEP 3: Semester GPAs ── */}
-          {step === 3 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}>
-              <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
-                <h2 style={{ fontSize: "1.375rem", fontWeight: 700, color: "#1c1917" }}>Your Grades So Far</h2>
-                <p style={{ color: "#78716c", fontSize: "0.875rem" }}>
-                  {form.completed_semesters === "0" || form.completed_semesters === ""
-                    ? "No completed semesters — you're just getting started! 🎉"
-                    : `Enter your SGPA for each completed semester`}
+                <p style={{ textAlign: "center", fontSize: "0.875rem", color: "var(--color-text-muted)" }}>
+                  Already have an account?{" "}
+                  <Link href="/login" style={{ color: "var(--color-primary-300)", fontWeight: 600, textDecoration: "none" }}>
+                    Sign in
+                  </Link>
                 </p>
-              </div>
+              </motion.div>
+            )}
 
-              {form.semester_gpas.length === 0 ? (
-                <div style={{
-                  padding: "2rem", textAlign: "center", background: "var(--color-surface-50)",
-                  borderRadius: "12px", border: "1px dashed var(--color-surface-300)",
-                }}>
-                  <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎓</p>
-                  <p style={{ color: "#78716c", fontSize: "0.9rem" }}>
-                    Your CGPA journey starts now. We'll track everything from here!
+            {/* ── STEP 2: University Info ── */}
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                custom={direction}
+                variants={stepSlide}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}
+              >
+                <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
+                  <h2 style={{ fontSize: "1.375rem", fontWeight: 700, color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>
+                    University Information
+                  </h2>
+                  <p style={{ color: "var(--color-text-muted)", fontSize: "0.875rem" }}>Tell us about your studies</p>
+                </div>
+
+                <Field label="University Name" error={errors.university_name}>
+                  <input className="clay-input" placeholder="e.g. Daffodil International University"
+                    value={form.university_name} onChange={(e) => set("university_name", e.target.value)} />
+                </Field>
+
+                {/* Degree dropdown */}
+                <Field label="Degree Program" error={errors.degree_program}>
+                  <div style={{ position: "relative" }}>
+                    <div
+                      className="clay-input"
+                      onClick={() => setDegreeOpen(!degreeOpen)}
+                      style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                    >
+                      <span style={{ color: form.degree_program ? "var(--color-text-primary)" : "var(--color-text-muted)" }}>
+                        {form.degree_program || "Select your degree..."}
+                      </span>
+                      <ChevronRight
+                        size={14}
+                        style={{
+                          transform: degreeOpen ? "rotate(90deg)" : "none",
+                          transition: "0.2s",
+                          color: "var(--color-text-muted)",
+                        }}
+                      />
+                    </div>
+
+                    <AnimatePresence>
+                      {degreeOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                          transition={{ duration: 0.2 }}
+                          style={{
+                            position: "absolute",
+                            top: "calc(100% + 4px)",
+                            left: 0,
+                            right: 0,
+                            zIndex: 50,
+                            background: "var(--color-surface-150)",
+                            borderRadius: "12px",
+                            border: "1px solid rgba(255, 255, 255, 0.08)",
+                            boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 30px -5px rgba(124,58,237,0.15)",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div style={{ padding: "0.5rem" }}>
+                            <input
+                              className="clay-input"
+                              placeholder="Search degrees..."
+                              value={form.degree_search}
+                              onChange={(e) => setForm((p) => ({ ...p, degree_search: e.target.value }))}
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ fontSize: "0.8125rem" }}
+                              autoFocus
+                            />
+                          </div>
+                          <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                            {filteredDegrees.map((d) => (
+                              <div
+                                key={d}
+                                onClick={() => { set("degree_program", d); setDegreeOpen(false); setForm((p) => ({ ...p, degree_search: "" })); }}
+                                style={{
+                                  padding: "0.625rem 1rem",
+                                  cursor: "pointer",
+                                  fontSize: "0.875rem",
+                                  background: form.degree_program === d ? "rgba(124, 58, 237, 0.12)" : "transparent",
+                                  color: form.degree_program === d ? "var(--color-primary-300)" : "var(--color-text-secondary)",
+                                  transition: "all 0.15s",
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                                onMouseLeave={(e) => (e.currentTarget.style.background = form.degree_program === d ? "rgba(124, 58, 237, 0.12)" : "transparent")}
+                              >
+                                {d}
+                              </div>
+                            ))}
+                            {filteredDegrees.length === 0 && (
+                              <p style={{ padding: "1rem", color: "var(--color-text-muted)", fontSize: "0.875rem", textAlign: "center" }}>
+                                No matches. Try different keywords.
+                              </p>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </Field>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
+                  <Field label="Current Semester" error={errors.current_semester}>
+                    <input className="clay-input" type="number" min={1} max={16} placeholder="e.g. 4"
+                      value={form.current_semester} onChange={(e) => set("current_semester", e.target.value)} />
+                  </Field>
+                  <Field label="Semesters Completed" error={errors.completed_semesters}>
+                    <input className="clay-input" type="number" min={0} max={16} placeholder="e.g. 3"
+                      value={form.completed_semesters} onChange={(e) => handleCompletedChange(e.target.value)} />
+                  </Field>
+                </div>
+
+                <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+                  <motion.button
+                    type="button"
+                    className="btn-secondary"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{ flex: 1, padding: "0.75rem" }}
+                    onClick={prevStep}
+                  >
+                    <ChevronLeft size={16} /> Back
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    className="btn-primary"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{ flex: 1, padding: "0.75rem" }}
+                    onClick={nextStep}
+                  >
+                    Continue <ChevronRight size={16} />
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── STEP 3: Semester GPAs ── */}
+            {step === 3 && (
+              <motion.div
+                key="step3"
+                custom={direction}
+                variants={stepSlide}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}
+              >
+                <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
+                  <h2 style={{ fontSize: "1.375rem", fontWeight: 700, color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>
+                    Your Grades So Far
+                  </h2>
+                  <p style={{ color: "var(--color-text-muted)", fontSize: "0.875rem" }}>
+                    {form.completed_semesters === "0" || form.completed_semesters === ""
+                      ? "No completed semesters — you're just getting started! 🎉"
+                      : "Enter your SGPA for each completed semester"}
                   </p>
                 </div>
-              ) : (
-                <>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                    {form.semester_gpas.map((gpa, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
-                        <span style={{
-                          minWidth: "90px", fontSize: "0.875rem", fontWeight: 500, color: "#44403c",
-                          background: "var(--color-surface-100)", padding: "0.5rem 0.75rem",
-                          borderRadius: "8px", textAlign: "center",
-                        }}>
-                          Sem {i + 1}
-                        </span>
-                        <div style={{ flex: 1 }}>
-                          <input
-                            className="clay-input"
-                            type="number" step="0.01" min="0" max="4"
-                            placeholder="e.g. 3.75"
-                            value={gpa}
-                            onChange={(e) => {
-                              const updated = [...form.semester_gpas];
-                              updated[i] = e.target.value;
-                              setForm((p) => ({ ...p, semester_gpas: updated }));
-                              setErrors((p) => ({ ...p, [`gpa_${i}`]: "" }));
-                            }}
-                          />
-                          {errors[`gpa_${i}`] && (
-                            <p style={{ fontSize: "0.75rem", color: "var(--color-error)", marginTop: "0.25rem" }}>
-                              {errors[`gpa_${i}`]}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+
+                {form.semester_gpas.length === 0 ? (
+                  <div style={{
+                    padding: "2rem",
+                    textAlign: "center",
+                    background: "rgba(255, 255, 255, 0.02)",
+                    borderRadius: "12px",
+                    border: "1px dashed rgba(255, 255, 255, 0.08)",
+                  }}>
+                    <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎓</p>
+                    <p style={{ color: "var(--color-text-muted)", fontSize: "0.9rem" }}>
+                      Your CGPA journey starts now. We&apos;ll track everything from here!
+                    </p>
                   </div>
-
-                  {/* Live CGPA preview */}
-                  {form.semester_gpas.some((g) => g !== "") && (
-                    <div style={{
-                      padding: "1rem", background: "var(--color-primary-50)",
-                      borderRadius: "10px", border: "1px solid var(--color-primary-100)",
-                      textAlign: "center",
-                    }}>
-                      <p style={{ fontSize: "0.8rem", color: "var(--color-primary-600)", marginBottom: "0.25rem" }}>
-                        Current CGPA (auto-calculated)
-                      </p>
-                      <p style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--color-primary-700)" }}>
-                        {(() => {
-                          const vals = form.semester_gpas.map((g) => parseFloat(g)).filter((v) => !isNaN(v));
-                          return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2) : "—";
-                        })()}
-                      </p>
-                      <p style={{ fontSize: "0.75rem", color: "#78716c" }}>This field is locked and auto-updated</p>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                      {form.semester_gpas.map((gpa, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
+                          <span style={{
+                            minWidth: "90px",
+                            fontSize: "0.875rem",
+                            fontWeight: 500,
+                            color: "var(--color-text-secondary)",
+                            background: "rgba(255, 255, 255, 0.04)",
+                            padding: "0.5rem 0.75rem",
+                            borderRadius: "8px",
+                            textAlign: "center",
+                            border: "1px solid rgba(255,255,255,0.06)",
+                          }}>
+                            Sem {i + 1}
+                          </span>
+                          <div style={{ flex: 1 }}>
+                            <input
+                              className="clay-input"
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="4"
+                              placeholder="e.g. 3.75"
+                              value={gpa}
+                              onChange={(e) => {
+                                const updated = [...form.semester_gpas];
+                                updated[i] = e.target.value;
+                                setForm((p) => ({ ...p, semester_gpas: updated }));
+                                setErrors((p) => ({ ...p, [`gpa_${i}`]: "" }));
+                              }}
+                            />
+                            {errors[`gpa_${i}`] && (
+                              <motion.p
+                                initial={{ opacity: 0, y: -4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                style={{ fontSize: "0.75rem", color: "var(--color-error)", marginTop: "0.25rem" }}
+                              >
+                                {errors[`gpa_${i}`]}
+                              </motion.p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </>
-              )}
 
-              <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
-                <button type="button" className="btn-secondary"
-                  style={{ flex: 1, padding: "0.75rem" }} onClick={() => setStep(2)}>
-                  <ChevronLeft size={16} /> Back
-                </button>
-                <button type="submit" className="btn-primary"
-                  style={{ flex: 1, padding: "0.75rem" }} disabled={loading}>
-                  {loading
-                    ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Creating...</>
-                    : "Create Account 🎉"
-                  }
-                </button>
-              </div>
-            </div>
-          )}
+                    {/* Live CGPA preview */}
+                    {form.semester_gpas.some((g) => g !== "") && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        style={{
+                          padding: "1rem",
+                          background: "rgba(124, 58, 237, 0.08)",
+                          borderRadius: "12px",
+                          border: "1px solid rgba(124, 58, 237, 0.15)",
+                          textAlign: "center",
+                          boxShadow: "0 0 20px -5px rgba(124, 58, 237, 0.15)",
+                        }}
+                      >
+                        <p style={{ fontSize: "0.8rem", color: "var(--color-primary-300)", marginBottom: "0.25rem" }}>
+                          Current CGPA (auto-calculated)
+                        </p>
+                        <p style={{ fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--font-display)" }}>
+                          <span className="text-gradient">
+                            {(() => {
+                              const vals = form.semester_gpas.map((g) => parseFloat(g)).filter((v) => !isNaN(v));
+                              return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2) : "—";
+                            })()}
+                          </span>
+                        </p>
+                        <p style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>This field is locked and auto-updated</p>
+                      </motion.div>
+                    )}
+                  </>
+                )}
+
+                <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+                  <motion.button
+                    type="button"
+                    className="btn-secondary"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{ flex: 1, padding: "0.75rem" }}
+                    onClick={prevStep}
+                  >
+                    <ChevronLeft size={16} /> Back
+                  </motion.button>
+                  <motion.button
+                    type="submit"
+                    className="btn-primary"
+                    whileHover={{ scale: loading ? 1 : 1.02 }}
+                    whileTap={{ scale: loading ? 1 : 0.98 }}
+                    style={{ flex: 1, padding: "0.75rem" }}
+                    disabled={loading}
+                  >
+                    {loading
+                      ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Creating...</>
+                      : "Create Account 🎉"
+                    }
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -516,21 +676,48 @@ export default function RegisterPage() {
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 500, color: "#44403c", marginBottom: "0.375rem" }}>
+      <label style={{
+        display: "block",
+        fontSize: "0.875rem",
+        fontWeight: 500,
+        color: "var(--color-text-secondary)",
+        marginBottom: "0.375rem",
+      }}>
         {label}
       </label>
       {children}
-      {error && <p style={{ fontSize: "0.8rem", color: "var(--color-error)", marginTop: "0.375rem" }}>{error}</p>}
+      {error && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ fontSize: "0.8rem", color: "var(--color-error)", marginTop: "0.375rem" }}
+        >
+          {error}
+        </motion.p>
+      )}
     </div>
   );
 }
 
 function ToggleEye({ show, onToggle }: { show: boolean; onToggle: () => void }) {
   return (
-    <button type="button" onClick={onToggle}
-      style={{ position: "absolute", right: "0.875rem", top: "50%", transform: "translateY(-50%)",
-               background: "none", border: "none", cursor: "pointer", color: "#a8a29e", padding: 0 }}
-      aria-label={show ? "Hide password" : "Show password"}>
+    <button
+      type="button"
+      onClick={onToggle}
+      style={{
+        position: "absolute",
+        right: "0.875rem",
+        top: "50%",
+        transform: "translateY(-50%)",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        color: "var(--color-text-muted)",
+        padding: 0,
+        transition: "color 0.2s",
+      }}
+      aria-label={show ? "Hide password" : "Show password"}
+    >
       {show ? <EyeOff size={16} /> : <Eye size={16} />}
     </button>
   );

@@ -30,12 +30,6 @@ const STATUS_TABS: { value: FilterStatus; label: string; icon: React.ReactNode }
   { value: "done",        label: "Done",       icon: <CheckCircle2 size={14} /> },
 ];
 
-const PRIORITY_COLORS = {
-  high:   { bg: "#fef2f2", color: "#ef4444", border: "#fecaca" },
-  medium: { bg: "#fffbeb", color: "#f59e0b", border: "#fde68a" },
-  low:    { bg: "#f0fdf4", color: "#22c55e", border: "#bbf7d0" },
-};
-
 export default function TasksClient({
   initialTasks, courses, userId,
 }: {
@@ -54,7 +48,6 @@ export default function TasksClient({
   const [sortBy,         setSortBy]         = useState<SortBy>("due_date");
   const [search,         setSearch]         = useState("");
 
-  // ── Stats ─────────────────────────────────────────────────
   const stats = useMemo(() => ({
     total:       tasks.length,
     pending:     tasks.filter((t) => t.status === "pending").length,
@@ -65,10 +58,8 @@ export default function TasksClient({
     ).length,
   }), [tasks]);
 
-  // ── Filtered + sorted tasks ────────────────────────────────
   const filtered = useMemo(() => {
     let result = [...tasks];
-
     if (filterStatus   !== "all") result = result.filter((t) => t.status   === filterStatus);
     if (filterPriority !== "all") result = result.filter((t) => t.priority  === filterPriority);
     if (filterType     !== "all") result = result.filter((t) => t.type      === filterType);
@@ -92,11 +83,9 @@ export default function TasksClient({
       if (sortBy === "type") return a.type.localeCompare(b.type);
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-
     return result;
   }, [tasks, filterStatus, filterPriority, filterType, search, sortBy]);
 
-  // ── Status cycle ───────────────────────────────────────────
   async function cycleStatus(task: Task) {
     const next: Record<string, Task["status"]> = {
       pending:     "in_progress",
@@ -105,20 +94,12 @@ export default function TasksClient({
     };
     const newStatus = next[task.status] ?? "pending";
 
-    setTasks((prev) =>
-      prev.map((t) => t.id === task.id ? { ...t, status: newStatus } : t)
-    );
+    setTasks((prev) => prev.map((t) => t.id === task.id ? { ...t, status: newStatus } : t));
 
-    const { error } = await supabase
-      .from("tasks")
-      .update({ status: newStatus })
-      .eq("id", task.id);
-
+    const { error } = await supabase.from("tasks").update({ status: newStatus }).eq("id", task.id);
     if (error) {
       toast.error("Failed to update status.");
-      setTasks((prev) =>
-        prev.map((t) => t.id === task.id ? { ...t, status: task.status } : t)
-      );
+      setTasks((prev) => prev.map((t) => t.id === task.id ? { ...t, status: task.status } : t));
     } else {
       const msgs: Record<string, string> = {
         in_progress: "Task started! 🚀",
@@ -129,28 +110,18 @@ export default function TasksClient({
     }
   }
 
-  // ── Delete ─────────────────────────────────────────────────
   async function deleteTask(taskId: string) {
     if (!confirm("Delete this task?")) return;
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
     const { error } = await supabase.from("tasks").delete().eq("id", taskId);
-    if (error) {
-      toast.error("Failed to delete.");
-      setTasks(initialTasks);
-    } else {
-      toast.success("Task deleted.");
-    }
+    if (error) { toast.error("Failed to delete."); setTasks(initialTasks); }
+    else { toast.success("Task deleted."); }
   }
 
-  // ── After add/edit ─────────────────────────────────────────
   function onTaskSaved(task: Task, isEdit: boolean) {
-    if (isEdit) {
-      setTasks((prev) => prev.map((t) => t.id === task.id ? task : t));
-    } else {
-      setTasks((prev) => [task, ...prev]);
-    }
-    setEditingTask(null);
-    setShowModal(false);
+    if (isEdit) setTasks((prev) => prev.map((t) => t.id === task.id ? task : t));
+    else setTasks((prev) => [task, ...prev]);
+    setEditingTask(null); setShowModal(false);
   }
 
   const courseMap = Object.fromEntries(courses.map((c) => [c.id, c]));
@@ -160,10 +131,10 @@ export default function TasksClient({
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.75rem" }}>
         <div>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1c1917", marginBottom: "0.25rem" }}>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--color-text-primary)", marginBottom: "0.25rem", fontFamily: "var(--font-display)" }}>
             Tasks
           </h1>
-          <p style={{ color: "#78716c", fontSize: "0.9375rem" }}>
+          <p style={{ color: "var(--color-text-muted)", fontSize: "0.9375rem" }}>
             {stats.pending} pending · {stats.in_progress} in progress · {stats.done} done
             {stats.overdue > 0 && (
               <span style={{ color: "var(--color-error)", fontWeight: 600 }}>
@@ -172,75 +143,43 @@ export default function TasksClient({
             )}
           </p>
         </div>
-        <button
-          className="btn-primary"
-          onClick={() => { setEditingTask(null); setShowModal(true); }}
-        >
+        <button className="btn-primary" onClick={() => { setEditingTask(null); setShowModal(true); }}>
           <Plus size={16} /> Add Task
         </button>
       </div>
 
       {/* Stat cards */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "1rem",
-        marginBottom: "1.75rem",
-      }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "1.75rem" }}>
         {[
-          { label: "Total",       value: stats.total,       color: "#6366f1", bg: "var(--color-primary-50)" },
-          { label: "Pending",     value: stats.pending,     color: "#f59e0b", bg: "#fffbeb"                 },
-          { label: "In Progress", value: stats.in_progress, color: "#0ea5e9", bg: "#f0f9ff"                 },
-          { label: "Done",        value: stats.done,        color: "#22c55e", bg: "#f0fdf4"                 },
+          { label: "Total",       value: stats.total,       color: "#818cf8", bg: "rgba(129, 140, 248, 0.12)" },
+          { label: "Pending",     value: stats.pending,     color: "#fbbf24", bg: "rgba(251, 191, 36, 0.12)" },
+          { label: "In Progress", value: stats.in_progress, color: "#38bdf8", bg: "rgba(56, 189, 248, 0.12)" },
+          { label: "Done",        value: stats.done,        color: "#34d399", bg: "rgba(52, 211, 153, 0.12)" },
         ].map((s) => (
-          <div key={s.label} className="clay-card" style={{ padding: "1.25rem" }}>
-            <p style={{ fontSize: "1.75rem", fontWeight: 700, color: s.color, lineHeight: 1 }}>
-              {s.value}
-            </p>
-            <p style={{ fontSize: "0.8125rem", color: "#78716c", marginTop: "0.25rem" }}>{s.label}</p>
+          <div key={s.label} className="glass-card-static" style={{ padding: "1.25rem" }}>
+            <p style={{ fontSize: "1.75rem", fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</p>
+            <p style={{ fontSize: "0.8125rem", color: "var(--color-text-muted)", marginTop: "0.25rem" }}>{s.label}</p>
           </div>
         ))}
       </div>
 
       {/* Filters row */}
-      <div className="clay-card" style={{ padding: "1.25rem 1.5rem", marginBottom: "1.5rem" }}>
+      <div className="glass-card-static" style={{ padding: "1.25rem 1.5rem", marginBottom: "1.5rem" }}>
         <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
-
           {/* Search */}
           <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
-            <Search size={15} style={{
-              position: "absolute", left: "0.875rem", top: "50%",
-              transform: "translateY(-50%)", color: "#a8a29e",
-            }} />
-            <input
-              className="clay-input"
-              placeholder="Search tasks..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: "2.25rem" }}
-            />
+            <Search size={15} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--color-text-muted)" }} />
+            <input className="clay-input" placeholder="Search tasks..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: "2.25rem" }} />
           </div>
 
-          {/* Priority filter */}
-          <select
-            className="clay-input"
-            value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value as FilterPriority)}
-            style={{ width: "auto", cursor: "pointer" }}
-          >
+          <select className="clay-input" value={filterPriority} onChange={(e) => setFilterPriority(e.target.value as FilterPriority)} style={{ width: "auto", cursor: "pointer" }}>
             <option value="all">All Priorities</option>
             <option value="high">High Priority</option>
             <option value="medium">Medium Priority</option>
             <option value="low">Low Priority</option>
           </select>
 
-          {/* Type filter */}
-          <select
-            className="clay-input"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as FilterType)}
-            style={{ width: "auto", cursor: "pointer" }}
-          >
+          <select className="clay-input" value={filterType} onChange={(e) => setFilterType(e.target.value as FilterType)} style={{ width: "auto", cursor: "pointer" }}>
             <option value="all">All Types</option>
             <option value="homework">Homework</option>
             <option value="assignment">Assignment</option>
@@ -250,13 +189,7 @@ export default function TasksClient({
             <option value="other">Other</option>
           </select>
 
-          {/* Sort */}
-          <select
-            className="clay-input"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortBy)}
-            style={{ width: "auto", cursor: "pointer" }}
-          >
+          <select className="clay-input" value={sortBy} onChange={(e) => setSortBy(e.target.value as SortBy)} style={{ width: "auto", cursor: "pointer" }}>
             <option value="due_date">Sort by Due Date</option>
             <option value="priority">Sort by Priority</option>
             <option value="type">Sort by Type</option>
@@ -267,28 +200,18 @@ export default function TasksClient({
         {/* Status tabs */}
         <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", flexWrap: "wrap" }}>
           {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setFilterStatus(tab.value)}
+            <button key={tab.value} onClick={() => setFilterStatus(tab.value)}
               style={{
                 display: "flex", alignItems: "center", gap: "0.375rem",
                 padding: "0.4rem 1rem", borderRadius: "999px",
-                fontSize: "0.8125rem", fontWeight: 500,
-                cursor: "pointer", transition: "all 0.15s",
-                background: filterStatus === tab.value ? "var(--color-primary-600)" : "var(--color-surface-100)",
-                color:      filterStatus === tab.value ? "white"                    : "#57534e",
-                border:     filterStatus === tab.value ? "none" : "1px solid var(--color-surface-200)",
-              }}
-            >
-              {tab.icon} {tab.label}
-              <span style={{
-                padding: "1px 6px", borderRadius: "999px", fontSize: "0.7rem",
-                background: filterStatus === tab.value ? "rgba(255,255,255,0.25)" : "var(--color-surface-200)",
+                fontSize: "0.8125rem", fontWeight: 500, cursor: "pointer", transition: "all 0.15s",
+                background: filterStatus === tab.value ? "linear-gradient(135deg, #7c3aed, #6366f1)" : "rgba(255, 255, 255, 0.04)",
+                color:      filterStatus === tab.value ? "white" : "var(--color-text-secondary)",
+                border:     filterStatus === tab.value ? "none" : "1px solid rgba(255, 255, 255, 0.08)",
               }}>
-                {tab.value === "all"         ? stats.total       :
-                 tab.value === "pending"     ? stats.pending     :
-                 tab.value === "in_progress" ? stats.in_progress :
-                 stats.done}
+              {tab.icon} {tab.label}
+              <span style={{ padding: "1px 6px", borderRadius: "999px", fontSize: "0.7rem", background: filterStatus === tab.value ? "rgba(255,255,255,0.25)" : "rgba(255, 255, 255, 0.08)", color: filterStatus === tab.value ? "white" : "var(--color-text-muted)" }}>
+                {tab.value === "all" ? stats.total : tab.value === "pending" ? stats.pending : tab.value === "in_progress" ? stats.in_progress : stats.done}
               </span>
             </button>
           ))}
@@ -297,52 +220,22 @@ export default function TasksClient({
 
       {/* Task list */}
       {filtered.length === 0 ? (
-        <div style={{
-          display: "flex", flexDirection: "column", alignItems: "center",
-          justifyContent: "center", padding: "4rem 2rem", textAlign: "center",
-        }}>
-          <p style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>
-            {tasks.length === 0 ? "📋" : "🔍"}
-          </p>
-          <h3 style={{ fontWeight: 700, color: "#1c1917", marginBottom: "0.5rem" }}>
-            {tasks.length === 0 ? "No tasks yet" : "No tasks match your filters"}
-          </h3>
-          <p style={{ color: "#78716c", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
-            {tasks.length === 0
-              ? "Add your first task to start tracking your work"
-              : "Try adjusting your filters or search term"}
-          </p>
-          {tasks.length === 0 && (
-            <button className="btn-primary" onClick={() => setShowModal(true)}>
-              <Plus size={16} /> Add Your First Task
-            </button>
-          )}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "4rem 2rem", textAlign: "center" }}>
+          <p style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>{tasks.length === 0 ? "📋" : "🔍"}</p>
+          <h3 style={{ fontWeight: 700, color: "var(--color-text-primary)", marginBottom: "0.5rem" }}>{tasks.length === 0 ? "No tasks yet" : "No tasks match your filters"}</h3>
+          <p style={{ color: "var(--color-text-muted)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>{tasks.length === 0 ? "Add your first task to start tracking your work" : "Try adjusting your filters or search term"}</p>
+          {tasks.length === 0 && (<button className="btn-primary" onClick={() => setShowModal(true)}><Plus size={16} /> Add Your First Task</button>)}
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           {filtered.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              course={task.course_id ? courseMap[task.course_id] : undefined}
-              onCycleStatus={() => cycleStatus(task)}
-              onEdit={() => { setEditingTask(task); setShowModal(true); }}
-              onDelete={() => deleteTask(task.id)}
-            />
+            <TaskCard key={task.id} task={task} course={task.course_id ? courseMap[task.course_id] : undefined} onCycleStatus={() => cycleStatus(task)} onEdit={() => { setEditingTask(task); setShowModal(true); }} onDelete={() => deleteTask(task.id)} />
           ))}
         </div>
       )}
 
       {/* Modal */}
-      {showModal && (
-        <AddTaskModal
-          task={editingTask}
-          courses={courses}
-          userId={userId}
-          onClose={() => { setShowModal(false); setEditingTask(null); }}
-          onSaved={onTaskSaved}
-        />
-      )}
+      {showModal && (<AddTaskModal task={editingTask} courses={courses} userId={userId} onClose={() => { setShowModal(false); setEditingTask(null); }} onSaved={onTaskSaved} />)}
     </>
   );
 }

@@ -71,6 +71,7 @@ import CourseUploader  from "@/components/courses/CourseUploader";
 import CourseDocuments from "@/components/courses/CourseDocuments";
 import CourseChat      from "@/components/courses/CourseChat";
 import LectureList     from "@/components/lectures/LectureList";
+import ClassLogTimeline from "@/components/courses/ClassLogTimeline";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -94,10 +95,12 @@ export default async function CourseDetailPage({ params }: Props) {
     { data: course    },
     { data: documents },
     { data: lectures  },
+    { data: classLogs },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", id).eq("user_id", user.id).single(),
     supabase.from("documents").select("*").eq("course_id", id).order("created_at", { ascending: false }),
     supabase.from("lectures").select("*").eq("course_id", id).eq("user_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("class_logs").select("*").eq("course_id", id).eq("user_id", user.id).order("date", { ascending: false }),
   ]);
 
   if (!course) notFound();
@@ -114,6 +117,7 @@ export default async function CourseDetailPage({ params }: Props) {
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           <CourseUploader  courseId={id} userId={user.id} />
           <CourseDocuments documents={documents ?? []} courseId={id} userId={user.id} />
+          <ClassLogTimeline logs={classLogs ?? []} courseId={id} />
           <LectureList
             lectures={lectures ?? []}
             course={{ id, name: course.name, color: course.color }}

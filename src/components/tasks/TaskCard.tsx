@@ -8,24 +8,24 @@ import type { Task } from "@/types";
 interface Course { id: string; name: string; color: string; }
 
 const TYPE_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  homework:     { label: "Homework",     bg: "#f0f9ff", color: "#0ea5e9" },
-  assignment:   { label: "Assignment",   bg: "var(--color-primary-50)", color: "var(--color-primary-600)" },
-  lab_report:   { label: "Lab Report",  bg: "#f0fdf4", color: "#22c55e" },
-  presentation: { label: "Presentation",bg: "#fdf4ff", color: "#a855f7" },
-  quiz:         { label: "Quiz",        bg: "#fffbeb", color: "#f59e0b" },
-  other:        { label: "Other",       bg: "var(--color-surface-100)", color: "#78716c" },
+  homework:     { label: "Homework",     bg: "rgba(14, 165, 233, 0.15)", color: "#38bdf8" },
+  assignment:   { label: "Assignment",   bg: "rgba(124, 58, 237, 0.15)", color: "#a78bfa" },
+  lab_report:   { label: "Lab Report",   bg: "rgba(34, 197, 94, 0.15)", color: "#4ade80" },
+  presentation: { label: "Presentation", bg: "rgba(168, 85, 247, 0.15)", color: "#c084fc" },
+  quiz:         { label: "Quiz",         bg: "rgba(245, 158, 11, 0.15)", color: "#fbbf24" },
+  other:        { label: "Other",        bg: "rgba(255, 255, 255, 0.05)", color: "var(--color-text-secondary)" },
 };
 
 const STATUS_CONFIG = {
-  pending:     { icon: <Circle      size={20} />, color: "#a8a29e", label: "Pending"     },
-  in_progress: { icon: <Loader      size={20} />, color: "#0ea5e9", label: "In Progress" },
-  done:        { icon: <CheckCircle2 size={20} />, color: "#22c55e", label: "Done"        },
+  pending:     { icon: <Circle      size={20} />, color: "var(--color-text-muted)", label: "Pending"     },
+  in_progress: { icon: <Loader      size={20} />, color: "#38bdf8", label: "In Progress" },
+  done:        { icon: <CheckCircle2 size={20} />, color: "#4ade80", label: "Done"        },
 };
 
 const PRIORITY_LEFT: Record<string, string> = {
-  high:   "#ef4444",
-  medium: "#f59e0b",
-  low:    "#22c55e",
+  high:   "#f87171",
+  medium: "#fbbf24",
+  low:    "#4ade80",
 };
 
 export default function TaskCard({
@@ -46,15 +46,25 @@ export default function TaskCard({
 
   return (
     <div
-      className="clay-card"
       style={{
         padding: "1.125rem 1.25rem",
         display: "flex",
         alignItems: "flex-start",
         gap: "1rem",
         borderLeft: `4px solid ${PRIORITY_LEFT[task.priority] ?? "#ccc"}`,
-        opacity: task.status === "done" ? 0.7 : 1,
-        transition: "opacity 0.2s",
+        opacity: task.status === "done" ? 0.6 : 1,
+        transition: "opacity 0.2s, transform 0.2s, background 0.2s",
+        background: "rgba(255, 255, 255, 0.02)",
+        borderRadius: "0 12px 12px 0",
+        borderTop: "1px solid rgba(255, 255, 255, 0.05)",
+        borderRight: "1px solid rgba(255, 255, 255, 0.05)",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "rgba(255, 255, 255, 0.02)";
       }}
     >
       {/* Status toggle */}
@@ -78,7 +88,7 @@ export default function TaskCard({
         <div style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem", marginBottom: "0.375rem", flexWrap: "wrap" }}>
           {/* Title */}
           <p style={{
-            fontSize: "0.9375rem", fontWeight: 600, color: "#1c1917",
+            fontSize: "0.9375rem", fontWeight: 600, color: "var(--color-text-primary)",
             textDecoration: task.status === "done" ? "line-through" : "none",
             flex: 1, minWidth: 0,
           }}>
@@ -90,6 +100,7 @@ export default function TaskCard({
             background: typeConf.bg,
             color:      typeConf.color,
             flexShrink: 0,
+            border: `1px solid ${typeConf.color}40`,
           }}>
             {typeConf.label}
           </span>
@@ -98,7 +109,7 @@ export default function TaskCard({
         {/* Description */}
         {task.description && (
           <p style={{
-            fontSize: "0.8375rem", color: "#78716c",
+            fontSize: "0.8375rem", color: "var(--color-text-secondary)",
             marginBottom: "0.5rem", lineHeight: 1.5,
             overflow: "hidden", textOverflow: "ellipsis",
             display: "-webkit-box", WebkitLineClamp: 2,
@@ -115,7 +126,7 @@ export default function TaskCard({
             <span style={{
               display: "flex", alignItems: "center", gap: "0.3rem",
               fontSize: "0.8rem",
-              color: isOverdue ? "var(--color-error)" : "#78716c",
+              color: isOverdue ? "var(--color-error)" : "var(--color-text-muted)",
               fontWeight: isOverdue ? 600 : 400,
             }}>
               <Clock size={12} />
@@ -128,11 +139,12 @@ export default function TaskCard({
           {course && (
             <span style={{
               display: "flex", alignItems: "center", gap: "0.3rem",
-              fontSize: "0.8rem", color: "#78716c",
+              fontSize: "0.8rem", color: "var(--color-text-muted)",
             }}>
               <span style={{
                 width: "8px", height: "8px", borderRadius: "50%",
-                background: course.color ?? "#6366f1", flexShrink: 0,
+                background: course.color ?? "#818cf8", flexShrink: 0,
+                boxShadow: `0 0 6px ${course.color ?? "#818cf8"}80`
               }} />
               {course.name}
             </span>
@@ -141,8 +153,9 @@ export default function TaskCard({
           {/* AI badge */}
           {task.ai_generated && (
             <span className="clay-badge" style={{
-              background: "var(--color-primary-50)",
-              color: "var(--color-primary-600)",
+              background: "rgba(124, 58, 237, 0.15)",
+              color: "var(--color-primary-300)",
+              border: "1px solid rgba(124, 58, 237, 0.3)",
               fontSize: "0.7rem",
             }}>
               ✨ AI
@@ -165,11 +178,14 @@ export default function TaskCard({
           onClick={onEdit}
           style={{
             padding: "6px", borderRadius: "8px", display: "flex",
-            background: "var(--color-surface-100)",
-            border: "1px solid var(--color-surface-200)",
-            color: "#78716c", cursor: "pointer",
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            color: "var(--color-text-muted)", cursor: "pointer",
+            transition: "all 0.15s"
           }}
           title="Edit task"
+          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--color-text-primary)"; e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-text-muted)"; e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"; }}
         >
           <Edit2 size={14} />
         </button>
@@ -177,11 +193,14 @@ export default function TaskCard({
           onClick={onDelete}
           style={{
             padding: "6px", borderRadius: "8px", display: "flex",
-            background: "#fef2f2",
-            border: "1px solid #fecaca",
+            background: "rgba(248, 113, 113, 0.1)",
+            border: "1px solid rgba(248, 113, 113, 0.2)",
             color: "var(--color-error)", cursor: "pointer",
+            transition: "all 0.15s"
           }}
           title="Delete task"
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(248, 113, 113, 0.2)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(248, 113, 113, 0.1)"; }}
         >
           <Trash2 size={14} />
         </button>

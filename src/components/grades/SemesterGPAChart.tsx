@@ -11,33 +11,33 @@ export default function SemesterGPAChart({ semesterGpas }: { semesterGpas: Semes
   const maxH  = 140;
 
   function barColor(sgpa: number) {
-    if (sgpa >= 3.5) return "#22c55e";
-    if (sgpa >= 3.0) return "#6366f1";
-    if (sgpa >= 2.5) return "#f59e0b";
-    return "#ef4444";
+    if (sgpa >= 3.5) return "#34d399";
+    if (sgpa >= 3.0) return "#818cf8";
+    if (sgpa >= 2.5) return "#fbbf24";
+    return "#f87171";
   }
 
   return (
-    <div className="clay-card" style={{ padding: "1.75rem" }}>
+    <div className="glass-card-static" style={{ padding: "1.75rem" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
         <div>
-          <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#1c1917", marginBottom: "0.25rem" }}>
+          <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text-primary)", marginBottom: "0.25rem", fontFamily: "var(--font-display)" }}>
             SGPA Trend
           </h2>
-          <p style={{ fontSize: "0.8rem", color: "#a8a29e" }}>Your performance across semesters</p>
+          <p style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>Your performance across semesters</p>
         </div>
 
         {/* Legend */}
         <div style={{ display: "flex", gap: "1rem" }}>
           {[
-            { color: "#22c55e", label: "≥ 3.5" },
-            { color: "#6366f1", label: "≥ 3.0" },
-            { color: "#f59e0b", label: "≥ 2.5" },
-            { color: "#ef4444", label: "< 2.5" },
+            { color: "#34d399", label: "≥ 3.5" },
+            { color: "#818cf8", label: "≥ 3.0" },
+            { color: "#fbbf24", label: "≥ 2.5" },
+            { color: "#f87171", label: "< 2.5" },
           ].map((l) => (
             <div key={l.label} style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
               <div style={{ width: "10px", height: "10px", borderRadius: "3px", background: l.color }} />
-              <span style={{ fontSize: "0.75rem", color: "#78716c" }}>{l.label}</span>
+              <span style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>{l.label}</span>
             </div>
           ))}
         </div>
@@ -52,7 +52,7 @@ export default function SemesterGPAChart({ semesterGpas }: { semesterGpas: Semes
           height: `${maxH}px`, paddingBottom: "2px",
         }}>
           {[4, 3, 2, 1, 0].map((v) => (
-            <span key={v} style={{ fontSize: "0.7rem", color: "#a8a29e", textAlign: "right" }}>
+            <span key={v} style={{ fontSize: "0.7rem", color: "var(--color-text-muted)", textAlign: "right" }}>
               {v}.0
             </span>
           ))}
@@ -72,25 +72,26 @@ export default function SemesterGPAChart({ semesterGpas }: { semesterGpas: Semes
                 }}
               >
                 {/* Value label */}
-                <span style={{ fontSize: "0.75rem", fontWeight: 700, color }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-primary)", opacity: 0.9 }}>
                   {s.sgpa.toFixed(2)}
                 </span>
 
                 {/* Bar */}
                 <div style={{
                   width: "100%", height: `${barH}px`,
-                  background: color,
+                  background: `linear-gradient(180deg, ${color}, ${color}aa)`,
                   borderRadius: "6px 6px 0 0",
                   transition: "height 0.5s ease",
                   minWidth: "28px",
                   position: "relative",
                   cursor: "default",
+                  boxShadow: `0 -5px 15px -5px ${color}40`,
                 }}
                   title={`Semester ${s.semester}: ${s.sgpa.toFixed(2)}`}
                 />
 
                 {/* Semester label */}
-                <span style={{ fontSize: "0.75rem", color: "#78716c" }}>
+                <span style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>
                   Sem {s.semester}
                 </span>
               </div>
@@ -101,12 +102,13 @@ export default function SemesterGPAChart({ semesterGpas }: { semesterGpas: Semes
 
       {/* Horizontal rule at 2.0 (pass mark) */}
       <div style={{
-        marginTop: "0.75rem", padding: "0.5rem 0.75rem",
-        background: "var(--color-surface-50)", borderRadius: "8px",
+        marginTop: "1.25rem", padding: "0.625rem 0.875rem",
+        background: "rgba(255, 255, 255, 0.03)", borderRadius: "8px",
         display: "flex", alignItems: "center", gap: "0.5rem",
+        border: "1px solid rgba(255, 255, 255, 0.05)"
       }}>
-        <div style={{ width: "24px", height: "3px", background: "#ef4444", borderRadius: "2px" }} />
-        <span style={{ fontSize: "0.75rem", color: "#78716c" }}>
+        <div style={{ width: "24px", height: "3px", background: "#f87171", borderRadius: "2px", boxShadow: "0 0 6px #f8717160" }} />
+        <span style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)" }}>
           2.00 — minimum passing CGPA at most universities
         </span>
       </div>

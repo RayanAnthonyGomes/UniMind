@@ -62,7 +62,7 @@ export default function LectureReader({
         href={`/courses/${courseId}`}
         style={{
           display: "inline-flex", alignItems: "center", gap: "0.375rem",
-          fontSize: "0.875rem", color: "#78716c", textDecoration: "none",
+          fontSize: "0.875rem", color: "var(--color-text-muted)", textDecoration: "none",
           marginBottom: "1.5rem",
         }}
       >
@@ -76,7 +76,7 @@ export default function LectureReader({
           padding: "2.5rem",
           marginBottom: "1.75rem",
           borderTop: `5px solid ${course.color ?? "#6366f1"}`,
-          background: "linear-gradient(135deg, white 0%, var(--color-surface-50) 100%)",
+          background: "var(--color-surface-100)",
         }}
       >
         {/* Course + meta */}
@@ -92,11 +92,11 @@ export default function LectureReader({
             📚 {course.name}
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: "0.25rem",
-                         fontSize: "0.8rem", color: "#78716c" }}>
+                         fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
             <Clock size={13} /> {lecture.read_time} min read
           </span>
           <span className="clay-badge" style={{
-            background: "#f0fdf4", color: "#22c55e", fontSize: "0.75rem",
+            background: "rgba(34,197,94,0.12)", color: "#22c55e", fontSize: "0.75rem",
           }}>
             <CheckCircle2 size={11} /> Read
           </span>
@@ -105,7 +105,7 @@ export default function LectureReader({
         {/* Title */}
         <h1 style={{
           fontSize: "clamp(1.5rem, 3vw, 2rem)",
-          fontWeight: 800, color: "#1c1917",
+          fontWeight: 800, color: "var(--color-text-primary)",
           lineHeight: 1.2, marginBottom: "0.75rem",
           letterSpacing: "-0.03em",
         }}>
@@ -113,7 +113,7 @@ export default function LectureReader({
         </h1>
 
         {lecture.topic && (
-          <p style={{ fontSize: "1rem", color: "#78716c", fontStyle: "italic" }}>
+          <p style={{ fontSize: "1rem", color: "var(--color-text-muted)", fontStyle: "italic" }}>
             Topic: {lecture.topic}
           </p>
         )}
@@ -132,7 +132,7 @@ export default function LectureReader({
             borderRadius: "999px",
           }} />
         </div>
-        <p style={{ fontSize: "0.75rem", color: "#a8a29e", marginTop: "0.375rem" }}>
+        <p style={{ fontSize: "0.75rem", color: "var(--color-text-muted)", marginTop: "0.375rem" }}>
           ✅ Lecture complete
         </p>
       </div>
@@ -148,7 +148,7 @@ export default function LectureReader({
             }}>
               <Target size={16} style={{ color: "var(--color-primary-600)" }} />
             </div>
-            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#1c1917" }}>
+            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text-primary)" }}>
               What You'll Learn
             </h2>
           </div>
@@ -170,7 +170,7 @@ export default function LectureReader({
                 }}>
                   {i + 1}
                 </span>
-                <p style={{ fontSize: "0.9rem", color: "#44403c", lineHeight: 1.6 }}>
+                <p style={{ fontSize: "0.9rem", color: "var(--color-text-secondary)", lineHeight: 1.6 }}>
                   {obj}
                 </p>
               </div>
@@ -207,19 +207,19 @@ export default function LectureReader({
               </div>
 
               <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: 700, fontSize: "1rem", color: "#1c1917", marginBottom: "0.125rem" }}>
+                <p style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-text-primary)", marginBottom: "0.125rem" }}>
                   {section.heading}
                 </p>
                 {expandedSection !== i && (
-                  <p style={{ fontSize: "0.8rem", color: "#a8a29e" }}>
+                  <p style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
                     Click to read this section
                   </p>
                 )}
               </div>
 
               {expandedSection === i
-                ? <ChevronUp   size={18} style={{ color: "#a8a29e", flexShrink: 0 }} />
-                : <ChevronDown size={18} style={{ color: "#a8a29e", flexShrink: 0 }} />
+                ? <ChevronUp   size={18} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+                : <ChevronDown size={18} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
               }
             </button>
 
@@ -230,7 +230,7 @@ export default function LectureReader({
                 <div style={{
                   fontSize: "0.9375rem",
                   lineHeight: 1.85,
-                  color: "#1c1917",
+                  color: "var(--color-text-primary)",
                   marginBottom: "1.25rem",
                   whiteSpace: "pre-wrap",
                 }}>
@@ -253,7 +253,7 @@ export default function LectureReader({
                                   color: course.color ?? "#6366f1", marginBottom: "0.25rem" }}>
                         KEY POINT
                       </p>
-                      <p style={{ fontSize: "0.9rem", color: "#1c1917", lineHeight: 1.6 }}>
+                      <p style={{ fontSize: "0.9rem", color: "var(--color-text-primary)", lineHeight: 1.6 }}>
                         {section.key_point}
                       </p>
                     </div>
@@ -267,7 +267,7 @@ export default function LectureReader({
 
       {/* Expand all hint */}
       {expandedSection === null && sections.length > 0 && (
-        <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#a8a29e", marginBottom: "1.5rem" }}>
+        <p style={{ textAlign: "center", fontSize: "0.8rem", color: "var(--color-text-muted)", marginBottom: "1.5rem" }}>
           Click any section above to read it
         </p>
       )}
@@ -278,12 +278,12 @@ export default function LectureReader({
           <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem" }}>
             <div style={{
               width: "32px", height: "32px", borderRadius: "8px",
-              background: "#fffbeb",
+              background: "rgba(245,158,11,0.12)",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
               <Hash size={16} style={{ color: "#f59e0b" }} />
             </div>
-            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#1c1917" }}>
+            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text-primary)" }}>
               Key Terms Glossary
             </h2>
           </div>
@@ -301,10 +301,10 @@ export default function LectureReader({
                 border: "1px solid var(--color-surface-200)",
               }}>
                 <p style={{ fontWeight: 700, fontSize: "0.875rem",
-                            color: "#1c1917", marginBottom: "0.375rem" }}>
+                            color: "var(--color-text-primary)", marginBottom: "0.375rem" }}>
                   {term.term}
                 </p>
-                <p style={{ fontSize: "0.8375rem", color: "#57534e", lineHeight: 1.55 }}>
+                <p style={{ fontSize: "0.8375rem", color: "var(--color-text-secondary)", lineHeight: 1.55 }}>
                   {term.definition}
                 </p>
               </div>
@@ -320,7 +320,7 @@ export default function LectureReader({
                 background: "var(--color-surface-100)",
                 border: "1px solid var(--color-surface-200)",
                 borderRadius: "8px", cursor: "pointer",
-                fontSize: "0.8375rem", color: "#78716c", fontWeight: 500,
+                fontSize: "0.8375rem", color: "var(--color-text-muted)", fontWeight: 500,
               }}
             >
               {showAllTerms ? "Show less" : `Show all ${keyTerms.length} terms`}
@@ -339,13 +339,13 @@ export default function LectureReader({
           <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem" }}>
             <div style={{
               width: "32px", height: "32px", borderRadius: "8px",
-              background: "white",
+              background: "var(--color-surface-50)",
               display: "flex", alignItems: "center", justifyContent: "center",
               boxShadow: "var(--shadow-clay-sm)",
             }}>
               <BookOpen size={16} style={{ color: "var(--color-primary-600)" }} />
             </div>
-            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#1c1917" }}>
+            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text-primary)" }}>
               Lecture Summary
             </h2>
           </div>
@@ -355,7 +355,7 @@ export default function LectureReader({
               <div key={i} style={{
                 display: "flex", gap: "0.75rem", alignItems: "flex-start",
                 padding: "0.75rem 1rem",
-                background: "white",
+                background: "var(--color-surface-50)",
                 borderRadius: "10px",
                 boxShadow: "var(--shadow-clay-sm)",
               }}>
@@ -373,7 +373,7 @@ export default function LectureReader({
 
       {/* Footer */}
       <div style={{ textAlign: "center", padding: "1rem 0 3rem" }}>
-        <p style={{ fontSize: "0.875rem", color: "#a8a29e", marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.875rem", color: "var(--color-text-muted)", marginBottom: "1rem" }}>
           Generated by UNIMIND AI from your course materials
         </p>
         <Link href={`/courses/${courseId}`} className="btn-secondary">

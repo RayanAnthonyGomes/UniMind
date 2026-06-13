@@ -18,9 +18,6 @@ export async function extractTextFromUrl(
       throw new Error(`Fetch failed: ${response.status}`);
     }
 
-    const contentType = response.headers.get("content-type") ?? "";
-    console.log("Content-Type:", contentType);
-
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
@@ -31,12 +28,23 @@ export async function extractTextFromUrl(
       return "";
     }
 
-    if (type === "pdf" || type === "obe" || type === "note") {
-      return await extractPdfText(buffer);
-    }
+    // Detect actual file type from magic bytes, not just the `type` label
+    const ext = detectExtension(buffer, url);
+    console.log("Detected extension:", ext, "| declared type:", type);
 
-    if (type === "ppt") {
-      return extractPptText(buffer);
+    if (ext === "pdf") return await extractPdfText(buffer);
+    if (ext === "pptx") return await extractPptxText(buffer);
+    if (ext === "docx") return await extractDocxText(buffer);
+    if (ext === "txt" || ext === "md") return cleanText(buffer.toString("utf-8"));
+
+    // Fallback: use declared type
+    if (type === "pdf" || type === "obe") return await extractPdfText(buffer);
+    if (type === "ppt") return await extractPptxText(buffer); // try as PPTX
+    if (type === "note") {
+      // Try DOCX first, then PDF, then plain text
+      const docxText = await extractDocxText(buffer);
+      if (docxText.length > 20) return docxText;
+      return await extractPdfText(buffer);
     }
 
     return cleanText(buffer.toString("utf-8"));
@@ -46,207 +54,133 @@ export async function extractTextFromUrl(
   }
 }
 
-// async function extractPdfText(buffer: Buffer): Promise<string> {
-//   try {
-//     console.log("Parsing PDF...");
-//     console.log("Buffer starts with:", buffer.slice(0, 5).toString());
+// ─── Magic byte detection ───────────────────────────────────────────────────
 
-//     // Try the non-legacy build first
-//     const pdfjsLib = await import("pdfjs-dist");
-//     console.log("pdfjs loaded, keys:", Object.keys(pdfjsLib).slice(0, 10));
+function detectExtension(buffer: Buffer, url: string): string {
+  // ZIP magic: PK\x03\x04 — covers PPTX, DOCX, XLSX (Office Open XML)
+  const isZip = buffer[0] === 0x50 && buffer[1] === 0x4b &&
+                buffer[2] === 0x03 && buffer[3] === 0x04;
 
-//     pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+  if (isZip) {
+    // Peek into the ZIP central directory to determine Office type
+    const str = buffer.toString("binary", 0, Math.min(buffer.length, 4000));
+    if (str.includes("ppt/")) return "pptx";
+    if (str.includes("word/")) return "docx";
+    if (str.includes("xl/"))   return "xlsx";
+    return "zip";
+  }
 
-//     const loadingTask = pdfjsLib.getDocument({
-//       data: new Uint8Array(buffer),
-//       useWorkerFetch: false,
-//       useSystemFonts: true,
-//     });
+  // PDF magic: %PDF
+  if (buffer[0] === 0x25 && buffer[1] === 0x50 &&
+      buffer[2] === 0x44 && buffer[3] === 0x46) {
+    return "pdf";
+  }
 
-//     const pdfDocument = await loadingTask.promise;
-//     console.log("PDF pages:", pdfDocument.numPages);
+  // Fall back to URL extension
+  const urlLower = url.toLowerCase().split("?")[0] ?? "";
+  if (urlLower.endsWith(".pptx")) return "pptx";
+  if (urlLower.endsWith(".ppt"))  return "pptx"; // treat old .ppt as PPTX attempt
+  if (urlLower.endsWith(".docx")) return "docx";
+  if (urlLower.endsWith(".doc"))  return "docx";
+  if (urlLower.endsWith(".pdf"))  return "pdf";
+  if (urlLower.endsWith(".txt"))  return "txt";
+  if (urlLower.endsWith(".md"))   return "md";
 
-//     const textParts: string[] = [];
-//     for (let i = 1; i <= pdfDocument.numPages; i++) {
-//       const page = await pdfDocument.getPage(i);
-//       const textContent = await page.getTextContent();
-//       const pageText = textContent.items
-//         .map((item: any) => ("str" in item ? item.str : ""))
-//         .join(" ");
-//       textParts.push(pageText);
-//     }
+  return "unknown";
+}
 
-//     const fullText = textParts.join("\n");
-//     console.log("Extracted text length:", fullText.length);
-//     console.log("Preview:", fullText.slice(0, 200));
-//     return cleanText(fullText);
-//   } catch (err) {
-//     console.error("PDF parse error:", err);
-//     return "";
-//   }
-// }
-// async function extractPdfText(buffer: Buffer): Promise<string> {
-//   try {
-//     console.log("Parsing PDF...");
-//     console.log("Buffer starts with:", buffer.slice(0, 5).toString());
+// ─── PDF ────────────────────────────────────────────────────────────────────
 
-//     // Try the non-legacy build first
-//     const pdfjsLib = await import("pdfjs-dist");
-//     console.log("pdfjs loaded, keys:", Object.keys(pdfjsLib).slice(0, 10));
-
-//     pdfjsLib.GlobalWorkerOptions.workerSrc = "";
-
-//     const loadingTask = pdfjsLib.getDocument({
-//       data: new Uint8Array(buffer),
-//       useWorkerFetch: false,
-//       useSystemFonts: true,
-//     });
-
-//     const pdfDocument = await loadingTask.promise;
-//     console.log("PDF pages:", pdfDocument.numPages);
-
-//     const textParts: string[] = [];
-//     for (let i = 1; i <= pdfDocument.numPages; i++) {
-//       const page = await pdfDocument.getPage(i);
-//       const textContent = await page.getTextContent();
-//       const pageText = textContent.items
-//         .map((item: any) => ("str" in item ? item.str : ""))
-//         .join(" ");
-//       textParts.push(pageText);
-//     }
-
-//     const fullText = textParts.join("\n");
-//     console.log("Extracted text length:", fullText.length);
-//     console.log("Preview:", fullText.slice(0, 200));
-//     return cleanText(fullText);
-//   } catch (err) {
-//     console.error("PDF parse error:", err);
-//     return "";
-//   }
-// }
-// async function extractPdfText(buffer: Buffer): Promise<string> {
-//   try {
-//     console.log("Parsing PDF...");
-
-//     // Polyfill DOMMatrix for Node.js before importing pdfjs
-//     if (typeof globalThis.DOMMatrix === "undefined") {
-//       const { DOMMatrix } = await import("@napi-rs/canvas");
-//       (globalThis as any).DOMMatrix = DOMMatrix;
-//     }
-
-//     const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-//     pdfjsLib.GlobalWorkerOptions.workerSrc = "";
-
-//     const loadingTask = pdfjsLib.getDocument({
-//       data: new Uint8Array(buffer),
-//       useWorkerFetch: false,
-//       useSystemFonts: true,
-//     });
-
-//     const pdfDocument = await loadingTask.promise;
-//     console.log("PDF pages:", pdfDocument.numPages);
-
-//     const textParts: string[] = [];
-//     for (let i = 1; i <= pdfDocument.numPages; i++) {
-//       const page = await pdfDocument.getPage(i);
-//       const textContent = await page.getTextContent();
-//       const pageText = textContent.items
-//         .map((item: any) => ("str" in item ? item.str : ""))
-//         .join(" ");
-//       textParts.push(pageText);
-//     }
-
-//     const fullText = textParts.join("\n");
-//     console.log("Extracted text length:", fullText.length);
-//     return cleanText(fullText);
-//   } catch (err) {
-//     console.error("PDF parse error:", err);
-//     return "";
-//   }
-// }
-// async function extractPdfText(buffer: Buffer): Promise<string> {
-//   try {
-//     console.log("Parsing PDF...");
-
-//     // Minimal DOMMatrix polyfill for Node.js (pdfjs needs it at module load)
-//     if (typeof globalThis.DOMMatrix === "undefined") {
-//       (globalThis as any).DOMMatrix = class DOMMatrix {
-//         a=1; b=0; c=0; d=1; e=0; f=0;
-//         m11=1; m12=0; m13=0; m14=0;
-//         m21=0; m22=1; m23=0; m24=0;
-//         m31=0; m32=0; m33=1; m34=0;
-//         m41=0; m42=0; m43=0; m44=1;
-//         constructor(init?: any) {}
-//         multiply(m: any) { return new (globalThis as any).DOMMatrix(); }
-//         inverse()        { return new (globalThis as any).DOMMatrix(); }
-//         translate(x=0,y=0,z=0) { return new (globalThis as any).DOMMatrix(); }
-//         scale(x=1,y=1,z=1)     { return new (globalThis as any).DOMMatrix(); }
-//         rotate(r=0)             { return new (globalThis as any).DOMMatrix(); }
-//         transformPoint(p: any)  { return p; }
-//       };
-//     }
-
-//     const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-//     pdfjsLib.GlobalWorkerOptions.workerSrc = "";
-
-//     const loadingTask = pdfjsLib.getDocument({
-//       data: new Uint8Array(buffer),
-//       useWorkerFetch: false,
-//       useSystemFonts: true,
-//     });
-
-//     const pdfDocument = await loadingTask.promise;
-//     console.log("PDF pages:", pdfDocument.numPages);
-
-//     const textParts: string[] = [];
-//     for (let i = 1; i <= pdfDocument.numPages; i++) {
-//       const page = await pdfDocument.getPage(i);
-//       const textContent = await page.getTextContent();
-//       const pageText = textContent.items
-//         .map((item: any) => ("str" in item ? item.str : ""))
-//         .join(" ");
-//       textParts.push(pageText);
-//     }
-
-//     const fullText = textParts.join("\n");
-//     console.log("Extracted text length:", fullText.length);
-//     return cleanText(fullText);
-//   } catch (err) {
-//     console.error("PDF parse error:", err);
-//     return "";
-//   }
-// }
 async function extractPdfText(buffer: Buffer): Promise<string> {
   try {
     console.log("Parsing PDF...");
-
     const { extractText } = await import("unpdf");
-
-const { text } = await extractText(new Uint8Array(buffer));
-const fullText = text.join("\n");
-
-console.log("Extracted text length:", fullText.length);
-return cleanText(fullText);
+    const { text } = await extractText(new Uint8Array(buffer));
+    const fullText = text.join("\n");
+    console.log("PDF extracted:", fullText.length, "chars");
+    return cleanText(fullText);
   } catch (err) {
     console.error("PDF parse error:", err);
     return "";
   }
 }
-function extractPptText(buffer: Buffer): string {
+
+// ─── PPTX ───────────────────────────────────────────────────────────────────
+
+async function extractPptxText(buffer: Buffer): Promise<string> {
   try {
-    const raw = buffer.toString("utf-8", 0, Math.min(buffer.length, 500000));
-    const matches = raw.match(/<a:t[^>]*>([^<]+)<\/a:t>/g) ?? [];
-    const text = matches
-      .map((m) => m.replace(/<[^>]+>/g, "").trim())
-      .filter((t) => t.length > 1)
-      .join(" ");
-    console.log("PPT extracted text length:", text.length);
-    return cleanText(text);
+    console.log("Parsing PPTX...");
+    const jszipMod = await import("jszip");
+    const JSZip = jszipMod.default || jszipMod;
+    const zip = await new JSZip().loadAsync(buffer);
+
+    // Collect all slide XML files in order
+    const slideFiles = Object.keys(zip.files)
+      .filter((name) => /^ppt\/slides\/slide\d+\.xml$/i.test(name))
+      .sort((a, b) => {
+        const na = parseInt(a.match(/\d+/)?.[0] ?? "0");
+        const nb = parseInt(b.match(/\d+/)?.[0] ?? "0");
+        return na - nb;
+      });
+
+    console.log("Found slides:", slideFiles.length);
+
+    const slideParts: string[] = [];
+
+    for (const slideFile of slideFiles) {
+      const xml = await zip.files[slideFile]!.async("string");
+      // Extract all <a:t> text nodes
+      const matches = xml.match(/<a:t[^>]*>([^<]*)<\/a:t>/g) ?? [];
+      const slideText = matches
+        .map((m) => m.replace(/<[^>]+>/g, "").trim())
+        .filter((t) => t.length > 0)
+        .join(" ");
+      if (slideText) slideParts.push(slideText);
+    }
+
+    // Also try notes slides for extra context
+    const notesFiles = Object.keys(zip.files)
+      .filter((name) => /^ppt\/notesSlides\/notesSlide\d+\.xml$/i.test(name));
+
+    for (const noteFile of notesFiles) {
+      const xml = await zip.files[noteFile]!.async("string");
+      const matches = xml.match(/<a:t[^>]*>([^<]*)<\/a:t>/g) ?? [];
+      const noteText = matches
+        .map((m) => m.replace(/<[^>]+>/g, "").trim())
+        .filter((t) => t.length > 0)
+        .join(" ");
+      if (noteText) slideParts.push(`[Notes] ${noteText}`);
+    }
+
+    const fullText = slideParts.join("\n");
+    console.log("PPTX extracted:", fullText.length, "chars across", slideFiles.length, "slides");
+    return cleanText(fullText);
   } catch (err) {
-    console.error("PPT parse error:", err);
+    console.error("PPTX parse error:", err);
     return "";
   }
 }
+
+// ─── DOCX ───────────────────────────────────────────────────────────────────
+
+async function extractDocxText(buffer: Buffer): Promise<string> {
+  try {
+    console.log("Parsing DOCX with mammoth...");
+    const mammothMod = await import("mammoth");
+    const mammoth = mammothMod.default || mammothMod;
+    const result = await mammoth.extractRawText({ buffer });
+    console.log("DOCX extracted:", result.value.length, "chars");
+    if (result.messages.length > 0) {
+      console.warn("Mammoth messages:", result.messages.slice(0, 3));
+    }
+    return cleanText(result.value);
+  } catch (err) {
+    console.error("DOCX parse error:", err);
+    return "";
+  }
+}
+
+// ─── Shared cleanup ─────────────────────────────────────────────────────────
 
 function cleanText(text: string): string {
   return text

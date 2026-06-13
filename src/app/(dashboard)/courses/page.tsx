@@ -1,4 +1,4 @@
-// // src/app/(dashboard)/courses/page.tsx
+// src/app/(dashboard)/courses/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -46,10 +46,14 @@ export default async function CoursesPage() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1c1917", marginBottom: "0.25rem" }}>
+          <h1 style={{
+            fontSize: "1.75rem", fontWeight: 700,
+            color: "var(--color-text-primary)", marginBottom: "0.25rem",
+            fontFamily: "var(--font-display)", letterSpacing: "-0.03em"
+          }}>
             My Courses
           </h1>
-          <p style={{ color: "#78716c", fontSize: "0.9375rem" }}>
+          <p style={{ color: "var(--color-text-muted)", fontSize: "0.9375rem" }}>
             {courses?.length
               ? `${courses.length} course${courses.length > 1 ? "s" : ""} across ${semesterKeys.length} semester${semesterKeys.length > 1 ? "s" : ""}`
               : "Add your first course to get started"}
@@ -66,16 +70,17 @@ export default async function CoursesPage() {
         }}>
           <div style={{
             width: "80px", height: "80px", borderRadius: "50%",
-            background: "var(--color-primary-50)",
+            background: "rgba(124, 58, 237, 0.12)",
             display: "flex", alignItems: "center", justifyContent: "center",
             marginBottom: "1.5rem",
+            boxShadow: "0 0 25px -5px rgba(124, 58, 237, 0.3)"
           }}>
             <BookOpen size={36} style={{ color: "var(--color-primary-400)" }} />
           </div>
-          <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1c1917", marginBottom: "0.5rem" }}>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--color-text-primary)", marginBottom: "0.5rem" }}>
             No courses yet
           </h2>
-          <p style={{ color: "#78716c", marginBottom: "1.5rem", maxWidth: "360px", lineHeight: 1.6 }}>
+          <p style={{ color: "var(--color-text-muted)", marginBottom: "1.5rem", maxWidth: "360px", lineHeight: 1.6 }}>
             Add your courses for this semester and UNIMIND will help you
             track everything — materials, grades, tasks and more.
           </p>
@@ -90,15 +95,17 @@ export default async function CoursesPage() {
       {/* Courses grouped by semester */}
       {semesterKeys.map((sem) => (
         <section key={sem}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#44403c" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
+            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text-primary)" }}>
               Semester {sem}
             </h2>
-            <div style={{ flex: 1, height: "1px", background: "var(--color-surface-200)" }} />
-            <span className="clay-badge" style={{
-              background: "var(--color-surface-100)",
-              border: "1px solid var(--color-surface-200)",
-              color: "#78716c",
+            <div style={{ flex: 1, height: "1px", background: "rgba(255, 255, 255, 0.08)" }} />
+            <span style={{
+              background: "rgba(255, 255, 255, 0.04)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              color: "var(--color-text-muted)",
+              padding: "0.2rem 0.6rem", borderRadius: "999px",
+              fontSize: "0.75rem", fontWeight: 600,
             }}>
               {bySemester[sem]?.length} course{(bySemester[sem]?.length ?? 0) > 1 ? "s" : ""}
             </span>
@@ -118,68 +125,3 @@ export default async function CoursesPage() {
     </div>
   );
 }
-
-// // src/app/(dashboard)/courses/[id]/page.tsx
-// import { createClient } from "@/lib/supabase/server";
-// import { redirect, notFound } from "next/navigation";
-// import CourseHeader    from "@/components/courses/CourseHeader";
-// import CourseUploader  from "@/components/courses/CourseUploader";
-// import CourseDocuments from "@/components/courses/CourseDocuments";
-// import CourseChat      from "@/components/courses/CourseChat";
-// import LectureList     from "@/components/lectures/LectureList";
-
-// interface Props {
-//   params: Promise<{ id: string }>;
-// }
-
-// export async function generateMetadata({ params }: Props) {
-//   const { id }   = await params;
-//   const supabase = await createClient();
-//   const { data } = await supabase.from("courses").select("name").eq("id", id).single();
-//   return { title: data?.name ?? "Course" };
-// }
-
-// export default async function CourseDetailPage({ params }: Props) {
-//   const { id }   = await params;
-//   const supabase = await createClient();
-
-//   const { data: { user } } = await supabase.auth.getUser();
-//   if (!user) redirect("/login");
-
-//   const [
-//     { data: course    },
-//     { data: documents },
-//     { data: lectures  },
-//   ] = await Promise.all([
-//     supabase.from("courses").select("*").eq("id", id).eq("user_id", user.id).single(),
-//     supabase.from("documents").select("*").eq("course_id", id).order("created_at", { ascending: false }),
-//     supabase.from("lectures").select("*").eq("course_id", id).eq("user_id", user.id).order("created_at", { ascending: false }),
-//   ]);
-
-//   if (!course) notFound();
-
-//   return (
-//     <div className="animate-fade-in" style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
-
-//       <CourseHeader course={course} documentCount={documents?.length ?? 0} />
-
-//       {/* Three column layout */}
-//       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.75rem", alignItems: "start" }}>
-
-//         {/* Left col: upload + documents + lectures */}
-//         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-//           <CourseUploader  courseId={id} userId={user.id} />
-//           <CourseDocuments documents={documents ?? []} courseId={id} userId={user.id} />
-//           <LectureList
-//             lectures={lectures ?? []}
-//             course={{ id, name: course.name, color: course.color }}
-//             userId={user.id}
-//           />
-//         </div>
-
-//         {/* Right col: course AI chat */}
-//         <CourseChat courseId={id} userId={user.id} courseName={course.name} />
-//       </div>
-//     </div>
-//   );
-// }

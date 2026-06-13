@@ -66,6 +66,15 @@ export interface Grade {
   created_at: string;
 }
 
+export interface ClassLog {
+  id: string;
+  user_id: string;
+  course_id: string;
+  date: string; // YYYY-MM-DD
+  topic: string;
+  created_at: string;
+}
+
 export interface ChatMessage {
   id: string;
   user_id: string;

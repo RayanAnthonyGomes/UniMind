@@ -17,11 +17,11 @@ interface Notification {
 }
 
 const TYPE_CONFIG: Record<string, { color: string; bg: string; emoji: string }> = {
-  task_due:   { color: "#f59e0b", bg: "#fffbeb", emoji: "⏰" },
-  grade_added:{ color: "#22c55e", bg: "#f0fdf4", emoji: "📊" },
-  ai_ready:   { color: "#6366f1", bg: "var(--color-primary-50)", emoji: "🤖" },
-  motivation: { color: "#ec4899", bg: "#fdf4ff", emoji: "💪" },
-  system:     { color: "#78716c", bg: "var(--color-surface-100)", emoji: "🔔" },
+  task_due:   { color: "#fbbf24", bg: "rgba(251, 191, 36, 0.10)", emoji: "⏰" },
+  grade_added:{ color: "#34d399", bg: "rgba(52, 211, 153, 0.10)", emoji: "📊" },
+  ai_ready:   { color: "#818cf8", bg: "rgba(129, 140, 248, 0.10)", emoji: "🤖" },
+  motivation: { color: "#f472b6", bg: "rgba(244, 114, 182, 0.10)", emoji: "💪" },
+  system:     { color: "var(--color-text-muted)", bg: "rgba(255, 255, 255, 0.04)", emoji: "🔔" },
 };
 
 function timeAgo(dateStr: string) {
@@ -125,21 +125,24 @@ export default function NotificationBell({ userId }: { userId: string }) {
         onClick={() => setOpen(!open)}
         style={{
           position: "relative",
-          background: open ? "var(--color-primary-50)" : "var(--color-surface-100)",
-          border: `1px solid ${open ? "var(--color-primary-200)" : "var(--color-surface-200)"}`,
+          background: open ? "rgba(124, 58, 237, 0.12)" : "rgba(255, 255, 255, 0.04)",
+          border: `1px solid ${open ? "rgba(124, 58, 237, 0.2)" : "rgba(255, 255, 255, 0.06)"}`,
           borderRadius: "10px",
           padding: "0.5rem",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transition: "all 0.15s",
+          transition: "all 0.2s",
         }}
         aria-label="Notifications"
       >
         <Bell
           size={18}
-          style={{ color: open ? "var(--color-primary-600)" : "#57534e" }}
+          style={{
+            color: open ? "var(--color-primary-300)" : "var(--color-text-muted)",
+            transition: "color 0.2s",
+          }}
         />
         {unread > 0 && (
           <span style={{
@@ -153,8 +156,9 @@ export default function NotificationBell({ userId }: { userId: string }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            border: "2px solid white",
+            border: "2px solid var(--color-surface-0)",
             padding: "0 3px",
+            boxShadow: "0 0 8px rgba(248, 113, 113, 0.4)",
           }}>
             {unread > 9 ? "9+" : unread}
           </span>
@@ -171,34 +175,35 @@ export default function NotificationBell({ userId }: { userId: string }) {
             right: 0,
             width: "380px",
             maxHeight: "520px",
-            background: "white",
+            background: "var(--color-surface-100)",
             borderRadius: "16px",
-            border: "1px solid var(--color-surface-200)",
-            boxShadow: "var(--shadow-clay-lg)",
+            border: "1px solid rgba(255, 255, 255, 0.06)",
+            boxShadow: "0 8px 40px rgba(0, 0, 0, 0.5), 0 0 30px -5px rgba(124, 58, 237, 0.1)",
             zIndex: 100,
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
+            backdropFilter: "blur(20px)",
           }}
         >
           {/* Header */}
           <div style={{
             padding: "1rem 1.25rem",
-            borderBottom: "1px solid var(--color-surface-100)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.04)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Bell size={16} style={{ color: "var(--color-primary-600)" }} />
-              <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#1c1917" }}>
+              <Bell size={16} style={{ color: "var(--color-primary-300)" }} />
+              <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--color-text-primary)" }}>
                 Notifications
               </span>
               {unread > 0 && (
                 <span style={{
                   padding: "1px 7px", borderRadius: "999px",
-                  background: "var(--color-primary-50)",
-                  color: "var(--color-primary-600)",
+                  background: "rgba(124, 58, 237, 0.12)",
+                  color: "var(--color-primary-300)",
                   fontSize: "0.75rem", fontWeight: 700,
                 }}>
                   {unread} new
@@ -212,9 +217,9 @@ export default function NotificationBell({ userId }: { userId: string }) {
                   onClick={markAllRead}
                   style={{
                     padding: "4px 8px", borderRadius: "6px",
-                    background: "var(--color-primary-50)",
-                    border: "1px solid var(--color-primary-100)",
-                    color: "var(--color-primary-600)",
+                    background: "rgba(124, 58, 237, 0.10)",
+                    border: "1px solid rgba(124, 58, 237, 0.15)",
+                    color: "var(--color-primary-300)",
                     fontSize: "0.75rem", fontWeight: 600,
                     cursor: "pointer",
                     display: "flex", alignItems: "center", gap: "0.25rem",
@@ -227,8 +232,8 @@ export default function NotificationBell({ userId }: { userId: string }) {
                 onClick={clearRead}
                 style={{
                   padding: "4px 8px", borderRadius: "6px",
-                  background: "#fef2f2",
-                  border: "1px solid #fecaca",
+                  background: "rgba(248, 113, 113, 0.08)",
+                  border: "1px solid rgba(248, 113, 113, 0.15)",
                   color: "var(--color-error)",
                   fontSize: "0.75rem", fontWeight: 600,
                   cursor: "pointer",
@@ -244,15 +249,15 @@ export default function NotificationBell({ userId }: { userId: string }) {
           <div style={{ flex: 1, overflowY: "auto" }}>
             {loading ? (
               <div style={{ padding: "2rem", textAlign: "center" }}>
-                <p style={{ color: "#a8a29e", fontSize: "0.875rem" }}>Loading...</p>
+                <p style={{ color: "var(--color-text-muted)", fontSize: "0.875rem" }}>Loading...</p>
               </div>
             ) : notifs.length === 0 ? (
               <div style={{ padding: "3rem 1.5rem", textAlign: "center" }}>
                 <p style={{ fontSize: "1.75rem", marginBottom: "0.75rem" }}>🔔</p>
-                <p style={{ fontWeight: 600, color: "#1c1917", marginBottom: "0.25rem" }}>
+                <p style={{ fontWeight: 600, color: "var(--color-text-primary)", marginBottom: "0.25rem" }}>
                   All caught up!
                 </p>
-                <p style={{ fontSize: "0.8rem", color: "#a8a29e" }}>
+                <p style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
                   No notifications right now.
                 </p>
               </div>
@@ -264,8 +269,8 @@ export default function NotificationBell({ userId }: { userId: string }) {
                     key={notif.id}
                     style={{
                       padding: "0.875rem 1.25rem",
-                      borderBottom: "1px solid var(--color-surface-50)",
-                      background: notif.is_read ? "white" : "var(--color-primary-50)",
+                      borderBottom: "1px solid rgba(255, 255, 255, 0.03)",
+                      background: notif.is_read ? "transparent" : "rgba(124, 58, 237, 0.05)",
                       display: "flex",
                       gap: "0.75rem",
                       alignItems: "flex-start",
@@ -287,18 +292,18 @@ export default function NotificationBell({ userId }: { userId: string }) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{
                         fontSize: "0.8375rem", fontWeight: notif.is_read ? 500 : 700,
-                        color: "#1c1917", marginBottom: "0.25rem",
+                        color: "var(--color-text-primary)", marginBottom: "0.25rem",
                       }}>
                         {notif.title}
                       </p>
                       <p style={{
-                        fontSize: "0.8rem", color: "#78716c",
+                        fontSize: "0.8rem", color: "var(--color-text-muted)",
                         lineHeight: 1.4, marginBottom: "0.375rem",
                       }}>
                         {notif.body}
                       </p>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <span style={{ fontSize: "0.72rem", color: "#a8a29e" }}>
+                        <span style={{ fontSize: "0.72rem", color: "var(--color-text-muted)" }}>
                           {timeAgo(notif.created_at)}
                         </span>
                         {notif.link && (
@@ -306,7 +311,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
                             href={notif.link}
                             onClick={() => { markRead(notif.id); setOpen(false); }}
                             style={{
-                              fontSize: "0.72rem", color: "var(--color-primary-600)",
+                              fontSize: "0.72rem", color: "var(--color-primary-300)",
                               textDecoration: "none", fontWeight: 600,
                               display: "flex", alignItems: "center", gap: "2px",
                             }}
@@ -323,8 +328,9 @@ export default function NotificationBell({ userId }: { userId: string }) {
                         onClick={() => markRead(notif.id)}
                         style={{
                           background: "none", border: "none",
-                          cursor: "pointer", color: "#a8a29e",
+                          cursor: "pointer", color: "var(--color-text-muted)",
                           padding: "2px", flexShrink: 0,
+                          transition: "color 0.2s",
                         }}
                         title="Mark as read"
                       >
@@ -340,7 +346,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
           {/* Footer actions */}
           <div style={{
             padding: "0.875rem 1.25rem",
-            borderTop: "1px solid var(--color-surface-100)",
+            borderTop: "1px solid rgba(255, 255, 255, 0.04)",
             display: "flex", gap: "0.625rem",
           }}>
             <button
@@ -356,9 +362,10 @@ export default function NotificationBell({ userId }: { userId: string }) {
                 flex: 1, padding: "0.5rem",
                 borderRadius: "8px", fontSize: "0.8rem",
                 fontWeight: 600, cursor: "pointer",
-                background: "var(--color-surface-50)",
-                border: "1px solid var(--color-surface-200)",
-                color: "#57534e",
+                background: "rgba(255, 255, 255, 0.04)",
+                border: "1px solid rgba(255, 255, 255, 0.06)",
+                color: "var(--color-text-secondary)",
+                transition: "all 0.15s",
               }}
             >
               ⏰ Send Reminder
@@ -376,9 +383,10 @@ export default function NotificationBell({ userId }: { userId: string }) {
                 flex: 1, padding: "0.5rem",
                 borderRadius: "8px", fontSize: "0.8rem",
                 fontWeight: 600, cursor: "pointer",
-                background: "var(--color-primary-50)",
-                border: "1px solid var(--color-primary-100)",
-                color: "var(--color-primary-600)",
+                background: "rgba(124, 58, 237, 0.10)",
+                border: "1px solid rgba(124, 58, 237, 0.15)",
+                color: "var(--color-primary-300)",
+                transition: "all 0.15s",
               }}
             >
               📬 Daily Digest

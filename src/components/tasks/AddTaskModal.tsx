@@ -125,7 +125,6 @@ export default function AddTaskModal({ task, courses, userId, onClose, onSaved }
     setLoading(false);
   }
 
-  // ── Today string for min date ──────────────────────────────
   const today = new Date().toISOString().split("T")[0];
 
   return (
@@ -133,30 +132,35 @@ export default function AddTaskModal({ task, courses, userId, onClose, onSaved }
       onClick={onClose}
       style={{
         position: "fixed", inset: 0, zIndex: 50,
-        background: "rgba(0,0,0,0.4)",
+        background: "rgba(0,0,0,0.6)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "1rem", backdropFilter: "blur(4px)",
+        padding: "1rem", backdropFilter: "blur(8px)",
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="clay-card animate-slide-up"
-        style={{ width: "100%", maxWidth: "520px", padding: "2rem", maxHeight: "92vh", overflowY: "auto" }}
+        className="animate-slide-up"
+        style={{
+          width: "100%", maxWidth: "520px", padding: "2rem", maxHeight: "92vh", overflowY: "auto",
+          background: "var(--color-surface-100)", borderRadius: "20px",
+          border: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 30px -5px rgba(124,58,237,0.1)",
+        }}
       >
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.75rem" }}>
           <div>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1c1917" }}>
+            <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>
               {isEdit ? "Edit Task" : "Add New Task"}
             </h2>
-            <p style={{ fontSize: "0.8rem", color: "#78716c", marginTop: "0.25rem" }}>
+            <p style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", marginTop: "0.25rem" }}>
               {isEdit ? "Update the details below" : "Fill in the details for your task"}
             </p>
           </div>
           <button onClick={onClose}
-            style={{ background: "var(--color-surface-100)", border: "1px solid var(--color-surface-200)",
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)",
                      borderRadius: "8px", padding: "6px", cursor: "pointer", display: "flex" }}>
-            <X size={16} style={{ color: "#78716c" }} />
+            <X size={16} style={{ color: "var(--color-text-muted)" }} />
           </button>
         </div>
 
@@ -255,21 +259,21 @@ export default function AddTaskModal({ task, courses, userId, onClose, onSaved }
           {/* Preview strip */}
           <div style={{
             padding: "0.875rem 1rem", borderRadius: "10px",
-            background: "var(--color-surface-50)",
-            border: "1px solid var(--color-surface-200)",
+            background: "rgba(255, 255, 255, 0.03)",
+            border: "1px solid rgba(255, 255, 255, 0.05)",
             display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center",
           }}>
-            <span style={{ fontSize: "0.8rem", color: "#78716c" }}>
+            <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
               {TASK_TYPES.find((t) => t.value === form.type)?.label}
             </span>
-            <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#c9bfb3" }} />
-            <span style={{ fontSize: "0.8rem", color: "#78716c" }}>
+            <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--color-text-muted)", opacity: 0.5 }} />
+            <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
               {PRIORITIES.find((p) => p.value === form.priority)?.label}
             </span>
             {form.due_date && (
               <>
-                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#c9bfb3" }} />
-                <span style={{ fontSize: "0.8rem", color: "#78716c" }}>
+                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--color-text-muted)", opacity: 0.5 }} />
+                <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
                   Due {new Date(form.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   {form.due_time ? ` at ${form.due_time}` : ""}
                 </span>
@@ -277,8 +281,8 @@ export default function AddTaskModal({ task, courses, userId, onClose, onSaved }
             )}
             {form.course_id && (
               <>
-                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#c9bfb3" }} />
-                <span style={{ fontSize: "0.8rem", color: "#78716c" }}>
+                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--color-text-muted)", opacity: 0.5 }} />
+                <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
                   {courses.find((c) => c.id === form.course_id)?.name}
                 </span>
               </>
@@ -286,7 +290,7 @@ export default function AddTaskModal({ task, courses, userId, onClose, onSaved }
           </div>
 
           {/* Actions */}
-          <div style={{ display: "flex", gap: "0.75rem" }}>
+          <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
             <button type="button" className="btn-secondary" style={{ flex: 1 }} onClick={onClose}>
               Cancel
             </button>
@@ -307,7 +311,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   return (
     <div>
       <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 500,
-                      color: "#44403c", marginBottom: "0.375rem" }}>
+                      color: "var(--color-text-secondary)", marginBottom: "0.375rem" }}>
         {label}
       </label>
       {children}

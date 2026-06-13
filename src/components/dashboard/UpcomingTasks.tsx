@@ -27,18 +27,27 @@ export default function UpcomingTasks({
   isOverdue?: boolean;
 }) {
   return (
-    <div className="clay-card" style={{ padding: "1.5rem" }}>
+    <div className="glass-card-static" style={{ padding: "1.5rem" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
         {isOverdue
           ? <AlertCircle size={18} style={{ color: "var(--color-error)" }} />
-          : <Clock size={18} style={{ color: "var(--color-primary-500)" }} />
+          : <Clock size={18} style={{ color: "var(--color-primary-400)" }} />
         }
-        <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#1c1917" }}>{title}</h2>
+        <h2 style={{
+          fontSize: "1rem", fontWeight: 700,
+          color: "var(--color-text-primary)",
+          fontFamily: "var(--font-display)",
+        }}>
+          {title}
+        </h2>
         {tasks.length > 0 && (
-          <span className="clay-badge" style={{
-            background: isOverdue ? "#fef2f2" : "var(--color-primary-50)",
-            color:      isOverdue ? "var(--color-error)" : "var(--color-primary-600)",
+          <span style={{
+            padding: "1px 7px", borderRadius: "999px",
+            background: isOverdue ? "rgba(248, 113, 113, 0.10)" : "rgba(124, 58, 237, 0.12)",
+            color:      isOverdue ? "var(--color-error)" : "var(--color-primary-300)",
+            fontSize: "0.75rem", fontWeight: 700,
             marginLeft: "auto",
+            border: `1px solid ${isOverdue ? "rgba(248, 113, 113, 0.15)" : "rgba(124, 58, 237, 0.15)"}`,
           }}>
             {tasks.length}
           </span>
@@ -48,48 +57,56 @@ export default function UpcomingTasks({
       {tasks.length === 0 ? (
         <div style={{
           padding: "1.5rem", textAlign: "center",
-          background: "var(--color-surface-50)", borderRadius: "10px",
-          border: "1px dashed var(--color-surface-300)",
+          background: "rgba(255, 255, 255, 0.02)", borderRadius: "10px",
+          border: "1px dashed rgba(255, 255, 255, 0.08)",
         }}>
-          <p style={{ color: "#a8a29e", fontSize: "0.875rem" }}>{emptyMsg}</p>
+          <p style={{ color: "var(--color-text-muted)", fontSize: "0.875rem" }}>{emptyMsg}</p>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
           {tasks.slice(0, 5).map((task) => (
             <div key={task.id} style={{
               display: "flex", alignItems: "center", gap: "0.75rem",
               padding: "0.75rem", borderRadius: "10px",
-              background: "var(--color-surface-50)",
-              border: "1px solid var(--color-surface-200)",
+              background: "rgba(255, 255, 255, 0.02)",
+              border: `1px solid ${isOverdue ? "rgba(248, 113, 113, 0.08)" : "rgba(255, 255, 255, 0.04)"}`,
+              transition: "all 0.15s",
             }}>
               {/* Type badge */}
               <span style={{
                 fontSize: "0.65rem", fontWeight: 700,
                 padding: "2px 6px", borderRadius: "6px",
-                background: isOverdue ? "#fef2f2" : "var(--color-primary-50)",
-                color: isOverdue ? "var(--color-error)" : "var(--color-primary-600)",
+                background: isOverdue ? "rgba(248, 113, 113, 0.10)" : "rgba(124, 58, 237, 0.10)",
+                color: isOverdue ? "var(--color-error)" : "var(--color-primary-300)",
                 flexShrink: 0,
               }}>
                 {TYPE_LABELS[task.type] ?? "OTH"}
               </span>
 
               {/* Title */}
-              <p style={{ fontSize: "0.8375rem", fontWeight: 500, color: "#1c1917",
-                          flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <p style={{
+                fontSize: "0.8375rem", fontWeight: 500,
+                color: "var(--color-text-primary)",
+                flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
                 {task.title}
               </p>
 
               {/* Priority dot */}
               <span style={{
                 width: "8px", height: "8px", borderRadius: "50%",
-                background: PRIORITY_COLORS[task.priority] ?? "#ccc",
+                background: PRIORITY_COLORS[task.priority] ?? "var(--color-text-muted)",
                 flexShrink: 0,
+                boxShadow: `0 0 6px ${PRIORITY_COLORS[task.priority] ?? "transparent"}`,
               }} title={`${task.priority} priority`} />
 
               {/* Due date */}
               {task.due_date && (
-                <span style={{ fontSize: "0.75rem", color: isOverdue ? "var(--color-error)" : "#a8a29e",
-                               flexShrink: 0, fontWeight: isOverdue ? 600 : 400 }}>
+                <span style={{
+                  fontSize: "0.75rem",
+                  color: isOverdue ? "var(--color-error)" : "var(--color-text-muted)",
+                  flexShrink: 0, fontWeight: isOverdue ? 600 : 400,
+                }}>
                   {formatDate(task.due_date)}
                 </span>
               )}
@@ -97,7 +114,10 @@ export default function UpcomingTasks({
           ))}
 
           {tasks.length > 5 && (
-            <p style={{ fontSize: "0.8rem", color: "#a8a29e", textAlign: "center", paddingTop: "0.25rem" }}>
+            <p style={{
+              fontSize: "0.8rem", color: "var(--color-text-muted)",
+              textAlign: "center", paddingTop: "0.25rem",
+            }}>
               +{tasks.length - 5} more — go to Tasks
             </p>
           )}

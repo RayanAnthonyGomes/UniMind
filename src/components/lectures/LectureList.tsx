@@ -84,10 +84,10 @@ export default function LectureList({
             <Sparkles size={15} style={{ color: "white" }} />
           </div>
           <div>
-            <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#1c1917" }}>
+            <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text-primary)" }}>
               AI Lectures
             </h3>
-            <p style={{ fontSize: "0.75rem", color: "#a8a29e" }}>
+            <p style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>
               Generated from your uploaded materials
             </p>
           </div>
@@ -112,10 +112,10 @@ export default function LectureList({
           border: "1px solid var(--color-surface-200)",
           marginBottom: "1rem",
         }}>
-          <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "#1c1917", marginBottom: "0.625rem" }}>
+          <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--color-text-primary)", marginBottom: "0.625rem" }}>
             What topic should this lecture cover?
           </p>
-          <p style={{ fontSize: "0.8rem", color: "#78716c", marginBottom: "0.875rem" }}>
+          <p style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", marginBottom: "0.875rem" }}>
             Leave blank to auto-detect from your uploaded documents.
           </p>
           <div style={{ display: "flex", gap: "0.625rem" }}>
@@ -159,10 +159,10 @@ export default function LectureList({
           border: "1px dashed var(--color-surface-300)",
         }}>
           <p style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>📖</p>
-          <p style={{ fontWeight: 600, color: "#1c1917", marginBottom: "0.375rem", fontSize: "0.9rem" }}>
+          <p style={{ fontWeight: 600, color: "var(--color-text-primary)", marginBottom: "0.375rem", fontSize: "0.9rem" }}>
             No lectures yet
           </p>
-          <p style={{ fontSize: "0.8rem", color: "#78716c", lineHeight: 1.5 }}>
+          <p style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", lineHeight: 1.5 }}>
             Upload your course materials first, then click "Generate Lecture".
             UNIMIND will read everything and write a clear, easy-to-understand lecture for you.
           </p>
@@ -179,8 +179,8 @@ export default function LectureList({
                 display: "flex", alignItems: "center", gap: "0.875rem",
                 padding: "1rem 1.125rem",
                 borderRadius: "10px",
-                background: lecture.is_read ? "var(--color-surface-50)" : "white",
-                border: `1px solid ${lecture.is_read ? "var(--color-surface-200)" : "var(--color-primary-100)"}`,
+                background: lecture.is_read ? "var(--color-surface-100)" : "var(--color-surface-50)",
+                border: `1px solid ${lecture.is_read ? "var(--color-surface-300)" : "var(--color-primary-100)"}`,
                 transition: "all 0.15s",
                 cursor: "pointer",
               }}
@@ -189,7 +189,7 @@ export default function LectureList({
                   e.currentTarget.style.borderColor = "var(--color-primary-200)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = lecture.is_read ? "var(--color-surface-50)" : "white";
+                  e.currentTarget.style.background = lecture.is_read ? "var(--color-surface-100)" : "var(--color-surface-50)";
                   e.currentTarget.style.borderColor = lecture.is_read ? "var(--color-surface-200)" : "var(--color-primary-100)";
                 }}
               >
@@ -212,7 +212,7 @@ export default function LectureList({
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
                     fontSize: "0.875rem", fontWeight: 600,
-                    color: lecture.is_read ? "#78716c" : "#1c1917",
+                    color: lecture.is_read ? "var(--color-text-muted)" : "var(--color-text-primary)",
                     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     marginBottom: "0.25rem",
                     textDecoration: lecture.is_read ? "line-through" : "none",
@@ -222,7 +222,7 @@ export default function LectureList({
                   <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
                     <span style={{
                       display: "flex", alignItems: "center", gap: "0.25rem",
-                      fontSize: "0.75rem", color: "#a8a29e",
+                      fontSize: "0.75rem", color: "var(--color-text-muted)",
                     }}>
                       <Clock size={11} /> {lecture.read_time} min
                     </span>

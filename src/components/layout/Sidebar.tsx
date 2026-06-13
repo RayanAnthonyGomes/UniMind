@@ -1,188 +1,3 @@
-// // src/components/layout/Sidebar.tsx
-// "use client";
-
-// import Link from "next/link";
-// import { usePathname } from "next/navigation";
-// import {
-//   LayoutDashboard, BookOpen, BarChart2, CheckSquare,
-//   Bot, PenTool, Sparkles, LogOut, ChevronLeft, ChevronRight,
-// } from "lucide-react";
-// import { useState } from "react";
-// import { createClient } from "@/lib/supabase/client";
-// import { useRouter } from "next/navigation";
-// import { getInitials } from "@/lib/utils";
-// import type { User } from "@/types";
-
-// const NAV = [
-//   { href: "/dashboard",      icon: LayoutDashboard, label: "Dashboard"     },
-//   { href: "/courses",        icon: BookOpen,         label: "Courses"       },
-//   { href: "/grades",         icon: BarChart2,        label: "Grades"        },
-//   { href: "/tasks",          icon: CheckSquare,      label: "Tasks"         },
-//   { href: "/ai-assistant",   icon: Bot,              label: "AI Assistant"  },
-//   { href: "/drawing-board",  icon: PenTool,          label: "Drawing Board" },
-//   { href: "/motivation",     icon: Sparkles,         label: "Motivation"    },
-// ];
-
-// export default function Sidebar({ profile }: { profile: User }) {
-//   const pathname  = usePathname();
-//   const router    = useRouter();
-//   const supabase  = createClient();
-//   const [collapsed, setCollapsed] = useState(false);
-
-//   async function handleLogout() {
-//     await supabase.auth.signOut();
-//     router.push("/login");
-//     router.refresh();
-//   }
-
-//   const width = collapsed ? "72px" : "240px";
-
-//   return (
-//     <aside
-//       style={{
-//         width,
-//         minWidth: width,
-//         height: "100vh",
-//         position: "sticky",
-//         top: 0,
-//         background: "white",
-//         borderRight: "1px solid var(--color-surface-200)",
-//         display: "flex",
-//         flexDirection: "column",
-//         transition: "width 0.25s ease, min-width 0.25s ease",
-//         overflow: "hidden",
-//         zIndex: 10,
-//       }}
-//     >
-//       {/* Logo + collapse button */}
-//       <div style={{
-//         padding: "1.25rem 1rem",
-//         display: "flex",
-//         alignItems: "center",
-//         justifyContent: collapsed ? "center" : "space-between",
-//         borderBottom: "1px solid var(--color-surface-100)",
-//         minHeight: "64px",
-//       }}>
-//         {!collapsed && (
-//           <Link href="/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-//             <div style={{
-//               width: "30px", height: "30px", borderRadius: "8px",
-//               background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-//               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-//             }}>
-//               <span style={{ color: "white", fontWeight: 700, fontSize: "0.875rem" }}>U</span>
-//             </div>
-//             <span style={{ fontWeight: 700, fontSize: "1rem", color: "#1c1917", whiteSpace: "nowrap" }}>
-//               UNI<span style={{ color: "var(--color-primary-600)" }}>MIND</span>
-//             </span>
-//           </Link>
-//         )}
-
-//         {collapsed && (
-//           <div style={{
-//             width: "30px", height: "30px", borderRadius: "8px",
-//             background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-//             display: "flex", alignItems: "center", justifyContent: "center",
-//           }}>
-//             <span style={{ color: "white", fontWeight: 700, fontSize: "0.875rem" }}>U</span>
-//           </div>
-//         )}
-
-//         {!collapsed && (
-//           <button onClick={() => setCollapsed(true)}
-//             style={{ background: "none", border: "none", cursor: "pointer", color: "#a8a29e", padding: "4px", borderRadius: "6px" }}
-//             aria-label="Collapse sidebar">
-//             <ChevronLeft size={16} />
-//           </button>
-//         )}
-//       </div>
-
-//       {/* Expand button when collapsed */}
-//       {collapsed && (
-//         <button onClick={() => setCollapsed(false)}
-//           style={{
-//             margin: "0.75rem auto", background: "var(--color-surface-100)",
-//             border: "1px solid var(--color-surface-200)", borderRadius: "8px",
-//             cursor: "pointer", color: "#78716c", padding: "6px", display: "flex",
-//           }}
-//           aria-label="Expand sidebar">
-//           <ChevronRight size={14} />
-//         </button>
-//       )}
-
-//       {/* Nav items */}
-//       <nav style={{ flex: 1, padding: "0.75rem 0.625rem", display: "flex", flexDirection: "column", gap: "2px" }}>
-//         {NAV.map(({ href, icon: Icon, label }) => {
-//           const active = pathname === href || pathname.startsWith(href + "/");
-//           return (
-//             <Link
-//               key={href}
-//               href={href}
-//               className={`sidebar-item${active ? " active" : ""}`}
-//               style={{ justifyContent: collapsed ? "center" : "flex-start" }}
-//               title={collapsed ? label : undefined}
-//             >
-//               <Icon size={18} style={{ flexShrink: 0 }} />
-//               {!collapsed && <span style={{ whiteSpace: "nowrap" }}>{label}</span>}
-//             </Link>
-//           );
-//         })}
-//       </nav>
-
-//       {/* User + logout */}
-//       <div style={{
-//         padding: "0.875rem 0.625rem",
-//         borderTop: "1px solid var(--color-surface-100)",
-//       }}>
-//         {!collapsed && (
-//           <div style={{
-//             display: "flex", alignItems: "center", gap: "0.625rem",
-//             padding: "0.5rem 0.75rem", borderRadius: "10px",
-//             background: "var(--color-surface-50)",
-//             marginBottom: "0.5rem",
-//           }}>
-//             <div style={{
-//               width: "32px", height: "32px", borderRadius: "50%",
-//               background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-//               display: "flex", alignItems: "center", justifyContent: "center",
-//               flexShrink: 0,
-//             }}>
-//               <span style={{ color: "white", fontWeight: 600, fontSize: "0.75rem" }}>
-//                 {getInitials(`${profile.first_name} ${profile.last_name}`)}
-//               </span>
-//             </div>
-//             <div style={{ overflow: "hidden" }}>
-//               <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#1c1917",
-//                           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-//                 {profile.first_name} {profile.last_name}
-//               </p>
-//               <p style={{ fontSize: "0.7rem", color: "#a8a29e", whiteSpace: "nowrap",
-//                           overflow: "hidden", textOverflow: "ellipsis" }}>
-//                 Semester {profile.current_semester}
-//               </p>
-//             </div>
-//           </div>
-//         )}
-
-//         <button
-//           onClick={handleLogout}
-//           className="sidebar-item"
-//           style={{
-//             width: "100%", border: "none", background: "none",
-//             justifyContent: collapsed ? "center" : "flex-start",
-//             color: "var(--color-error)",
-//           }}
-//           title={collapsed ? "Sign out" : undefined}
-//         >
-//           <LogOut size={16} style={{ flexShrink: 0 }} />
-//           {!collapsed && <span>Sign out</span>}
-//         </button>
-//       </div>
-//     </aside>
-//   );
-// }
-
-//added mobile support
 // src/components/layout/Sidebar.tsx
 "use client";
 
@@ -198,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { getInitials } from "@/lib/utils";
 import type { User } from "@/types";
+import { motion, AnimatePresence } from "framer-motion";
 
 const NAV = [
   { href: "/dashboard",     icon: LayoutDashboard, label: "Dashboard"     },
@@ -217,7 +33,6 @@ export default function Sidebar({ profile }: { profile: User }) {
   const [collapsed,  setCollapsed]  = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   async function handleLogout() {
@@ -234,31 +49,36 @@ export default function Sidebar({ profile }: { profile: User }) {
         display: "flex",
         alignItems: "center",
         justifyContent: (collapsed && !isMobile) ? "center" : "space-between",
-        borderBottom: "1px solid var(--color-surface-100)",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.04)",
         minHeight: "64px",
       }}>
         {(!collapsed || isMobile) && (
           <Link href="/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <div style={{
-              width: "30px", height: "30px", borderRadius: "8px",
-              background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+              width: "32px", height: "32px", borderRadius: "10px",
+              background: "linear-gradient(135deg, #7c3aed, #6366f1)",
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              boxShadow: "0 0 20px -3px rgba(124, 58, 237, 0.4)",
             }}>
-              <span style={{ color: "white", fontWeight: 700, fontSize: "0.875rem" }}>U</span>
+              <span style={{ color: "white", fontWeight: 700, fontSize: "0.875rem", fontFamily: "var(--font-display)" }}>U</span>
             </div>
-            <span style={{ fontWeight: 700, fontSize: "1rem", color: "#1c1917", whiteSpace: "nowrap" }}>
-              UNI<span style={{ color: "var(--color-primary-600)" }}>MIND</span>
+            <span style={{
+              fontWeight: 700, fontSize: "1rem", color: "var(--color-text-primary)",
+              whiteSpace: "nowrap", fontFamily: "var(--font-display)",
+            }}>
+              UNI<span className="text-gradient">MIND</span>
             </span>
           </Link>
         )}
 
         {collapsed && !isMobile && (
           <div style={{
-            width: "30px", height: "30px", borderRadius: "8px",
-            background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+            width: "32px", height: "32px", borderRadius: "10px",
+            background: "linear-gradient(135deg, #7c3aed, #6366f1)",
             display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 0 20px -3px rgba(124, 58, 237, 0.4)",
           }}>
-            <span style={{ color: "white", fontWeight: 700, fontSize: "0.875rem" }}>U</span>
+            <span style={{ color: "white", fontWeight: 700, fontSize: "0.875rem", fontFamily: "var(--font-display)" }}>U</span>
           </div>
         )}
 
@@ -266,54 +86,113 @@ export default function Sidebar({ profile }: { profile: User }) {
           <button
             onClick={() => setCollapsed(!collapsed)}
             style={{
-              background: "none", border: "none", cursor: "pointer",
-              color: "#a8a29e", padding: "4px", borderRadius: "6px",
+              background: "rgba(255, 255, 255, 0.04)",
+              border: "1px solid rgba(255, 255, 255, 0.06)",
+              borderRadius: "8px",
+              cursor: "pointer",
+              color: "var(--color-text-muted)",
+              padding: "5px",
+              display: "flex",
+              transition: "all 0.2s",
             }}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
         )}
 
         {isMobile && (
           <button onClick={() => setMobileOpen(false)}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "#78716c" }}>
-            <X size={20} />
+            style={{
+              background: "rgba(255, 255, 255, 0.04)",
+              border: "1px solid rgba(255, 255, 255, 0.06)",
+              borderRadius: "8px",
+              cursor: "pointer",
+              color: "var(--color-text-muted)",
+              padding: "5px",
+              display: "flex",
+            }}>
+            <X size={18} />
           </button>
         )}
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: "0.75rem 0.625rem", display: "flex", flexDirection: "column", gap: "2px" }}>
+      <nav style={{
+        flex: 1, padding: "0.75rem 0.5rem",
+        display: "flex", flexDirection: "column", gap: "2px",
+      }}>
         {NAV.map(({ href, icon: Icon, label }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}
               href={href}
-              className={`sidebar-item${active ? " active" : ""}`}
-              style={{ justifyContent: (collapsed && !isMobile) ? "center" : "flex-start" }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                padding: "0.625rem 0.75rem",
+                borderRadius: "10px",
+                color: active ? "var(--color-primary-300)" : "var(--color-text-muted)",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                cursor: "pointer",
+                transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                textDecoration: "none",
+                position: "relative",
+                justifyContent: (collapsed && !isMobile) ? "center" : "flex-start",
+                background: active ? "rgba(124, 58, 237, 0.10)" : "transparent",
+              }}
               title={(collapsed && !isMobile) ? label : undefined}
             >
-              <Icon size={18} style={{ flexShrink: 0 }} />
-              {(!collapsed || isMobile) && <span style={{ whiteSpace: "nowrap" }}>{label}</span>}
+              {/* Active indicator bar */}
+              {active && (
+                <motion.div
+                  layoutId="sidebar-active"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    width: "3px",
+                    height: "55%",
+                    background: "var(--color-primary-500)",
+                    borderRadius: "0 4px 4px 0",
+                    boxShadow: "0 0 12px rgba(124, 58, 237, 0.6)",
+                  }}
+                />
+              )}
+              <Icon size={18} style={{
+                flexShrink: 0,
+                filter: active ? "drop-shadow(0 0 6px rgba(124, 58, 237, 0.4))" : "none",
+                transition: "filter 0.2s",
+              }} />
+              {(!collapsed || isMobile) && (
+                <span style={{ whiteSpace: "nowrap" }}>{label}</span>
+              )}
             </Link>
           );
         })}
       </nav>
 
       {/* User + logout */}
-      <div style={{ padding: "0.875rem 0.625rem", borderTop: "1px solid var(--color-surface-100)" }}>
+      <div style={{ padding: "0.75rem 0.5rem", borderTop: "1px solid rgba(255, 255, 255, 0.04)" }}>
         {(!collapsed || isMobile) && (
           <div style={{
             display: "flex", alignItems: "center", gap: "0.625rem",
-            padding: "0.5rem 0.75rem", borderRadius: "10px",
-            background: "var(--color-surface-50)", marginBottom: "0.5rem",
+            padding: "0.625rem 0.75rem", borderRadius: "10px",
+            background: "rgba(255, 255, 255, 0.03)",
+            border: "1px solid rgba(255, 255, 255, 0.04)",
+            marginBottom: "0.5rem",
           }}>
             <div style={{
-              width: "32px", height: "32px", borderRadius: "50%",
-              background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              width: "34px", height: "34px", borderRadius: "50%",
+              background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+              boxShadow: "0 0 15px -3px rgba(124, 58, 237, 0.3)",
             }}>
               <span style={{ color: "white", fontWeight: 600, fontSize: "0.75rem" }}>
                 {getInitials(`${profile.first_name} ${profile.last_name}`)}
@@ -321,12 +200,12 @@ export default function Sidebar({ profile }: { profile: User }) {
             </div>
             <div style={{ overflow: "hidden" }}>
               <p style={{
-                fontSize: "0.8125rem", fontWeight: 600, color: "#1c1917",
+                fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-text-primary)",
                 whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
               }}>
                 {profile.first_name} {profile.last_name}
               </p>
-              <p style={{ fontSize: "0.7rem", color: "#a8a29e" }}>
+              <p style={{ fontSize: "0.7rem", color: "var(--color-text-muted)" }}>
                 Semester {profile.current_semester}
               </p>
             </div>
@@ -335,11 +214,21 @@ export default function Sidebar({ profile }: { profile: User }) {
 
         <button
           onClick={handleLogout}
-          className="sidebar-item"
           style={{
-            width: "100%", border: "none", background: "none",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            padding: "0.625rem 0.75rem",
+            borderRadius: "10px",
+            width: "100%",
+            border: "none",
+            background: "none",
             justifyContent: (collapsed && !isMobile) ? "center" : "flex-start",
             color: "var(--color-error)",
+            fontWeight: 500,
+            fontSize: "0.875rem",
+            cursor: "pointer",
+            transition: "all 0.2s",
           }}
           title={(collapsed && !isMobile) ? "Sign out" : undefined}
         >
@@ -359,30 +248,38 @@ export default function Sidebar({ profile }: { profile: User }) {
           display: "none",
           position: "fixed", top: "14px", left: "1rem",
           zIndex: 60,
-          background: "white",
-          border: "1px solid var(--color-surface-200)",
+          background: "rgba(17, 17, 24, 0.8)",
+          backdropFilter: "blur(12px)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
           borderRadius: "10px",
           padding: "8px", cursor: "pointer",
+          boxShadow: "0 0 20px rgba(0,0,0,0.3)",
         }}
         className="mobile-menu-btn"
         aria-label="Open menu"
       >
-        <Menu size={20} style={{ color: "#57534e" }} />
+        <Menu size={20} style={{ color: "var(--color-text-secondary)" }} />
       </button>
 
       {/* ── MOBILE OVERLAY ────────────────────────────────── */}
-      {mobileOpen && (
-        <div
-          onClick={() => setMobileOpen(false)}
-          style={{
-            display: "none",
-            position: "fixed", inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            zIndex: 49,
-          }}
-          className="mobile-overlay"
-        />
-      )}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileOpen(false)}
+            style={{
+              display: "none",
+              position: "fixed", inset: 0,
+              background: "rgba(0, 0, 0, 0.6)",
+              backdropFilter: "blur(4px)",
+              zIndex: 49,
+            }}
+            className="mobile-overlay"
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── MOBILE DRAWER ─────────────────────────────────── */}
       <aside
@@ -391,12 +288,12 @@ export default function Sidebar({ profile }: { profile: User }) {
           display: "none",
           position: "fixed", top: 0, left: 0, bottom: 0,
           width: "260px", zIndex: 50,
-          background: "white",
-          borderRight: "1px solid var(--color-surface-200)",
+          background: "var(--color-surface-50)",
+          borderRight: "1px solid rgba(255, 255, 255, 0.04)",
           flexDirection: "column",
           transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
-          transition: "transform 0.25s ease",
-          boxShadow: "var(--shadow-clay-lg)",
+          transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+          boxShadow: mobileOpen ? "4px 0 40px rgba(0,0,0,0.5)" : "none",
         }}
       >
         <NavContent isMobile />
@@ -410,11 +307,11 @@ export default function Sidebar({ profile }: { profile: User }) {
           minWidth: collapsed ? "72px" : "240px",
           height: "100vh",
           position: "sticky", top: 0,
-          background: "white",
-          borderRight: "1px solid var(--color-surface-200)",
+          background: "var(--color-surface-50)",
+          borderRight: "1px solid rgba(255, 255, 255, 0.04)",
           display: "flex",
           flexDirection: "column",
-          transition: "width 0.25s ease, min-width 0.25s ease",
+          transition: "width 0.3s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
           overflow: "hidden",
           zIndex: 10,
         }}

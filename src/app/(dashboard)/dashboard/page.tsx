@@ -36,44 +36,44 @@ export default async function DashboardPage() {
   const greeting = getGreeting(profile.first_name);
 
   // Build summary cards data
-const cards = [
-  {
-    label: "Active Courses",
-    value: courses?.length ?? 0,
-    icon:  <BookOpen size={20} />,
-    color: "var(--color-primary-600)",
-    bg:    "var(--color-primary-50)",
-    sub:   "This semester",
-    href:  "/courses",
-  },
-  {
-    label: "Files Uploaded",
-    value: documents?.length ?? 0,
-    icon:  <FileText size={20} />,
-    color: "#0ea5e9",
-    bg:    "#f0f9ff",
-    sub:   "PDFs, PPTs, notes",
-    href:  "/courses",
-  },
-  {
-    label: "Pending Tasks",
-    value: tasks?.length ?? 0,
-    icon:  <CheckSquare size={20} />,
-    color: "#f59e0b",
-    bg:    "#fffbeb",
-    sub:   "Due soon",
-    href:  "/tasks",
-  },
-  {
-    label: "Current CGPA",
-    value: profile.current_cgpa?.toFixed(2) ?? "0.00",
-    icon:  <TrendingUp size={20} />,
-    color: "#22c55e",
-    bg:    "#f0fdf4",
-    sub:   `${semesterGpas?.length ?? 0} semesters tracked`,
-    href:  "/grades",
-  },
-];
+  const cards = [
+    {
+      label: "Active Courses",
+      value: courses?.length ?? 0,
+      icon:  <BookOpen size={20} />,
+      color: "#818cf8",
+      bg:    "rgba(129, 140, 248, 0.10)",
+      sub:   "This semester",
+      href:  "/courses",
+    },
+    {
+      label: "Files Uploaded",
+      value: documents?.length ?? 0,
+      icon:  <FileText size={20} />,
+      color: "#38bdf8",
+      bg:    "rgba(56, 189, 248, 0.10)",
+      sub:   "PDFs, PPTs, notes",
+      href:  "/courses",
+    },
+    {
+      label: "Pending Tasks",
+      value: tasks?.length ?? 0,
+      icon:  <CheckSquare size={20} />,
+      color: "#fbbf24",
+      bg:    "rgba(251, 191, 36, 0.10)",
+      sub:   "Due soon",
+      href:  "/tasks",
+    },
+    {
+      label: "Current CGPA",
+      value: profile.current_cgpa?.toFixed(2) ?? "0.00",
+      icon:  <TrendingUp size={20} />,
+      color: "#34d399",
+      bg:    "rgba(52, 211, 153, 0.10)",
+      sub:   `${semesterGpas?.length ?? 0} semesters tracked`,
+      href:  "/grades",
+    },
+  ];
 
   // Categorise pending tasks
   const overdue   = tasks?.filter((t) => t.due_date && new Date(t.due_date) < new Date()) ?? [];
@@ -85,20 +85,27 @@ const cards = [
 
       {/* Greeting */}
       <div>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1c1917", marginBottom: "0.25rem" }}>
-          {greeting}
+        <h1 style={{
+          fontSize: "1.75rem", fontWeight: 700,
+          marginBottom: "0.25rem",
+          fontFamily: "var(--font-display)",
+          letterSpacing: "-0.03em",
+        }}>
+          <span className="animate-wave">👋</span>{" "}
+          <span className="text-gradient">{greeting.slice(0, -2)}</span>
+          <span>{greeting.slice(-2)}</span>
         </h1>
-        <p style={{ color: "#78716c", fontSize: "0.9375rem" }}>
+        <p style={{ color: "var(--color-text-muted)", fontSize: "0.9375rem" }}>
           {profile.university_name
             ? `${profile.degree_program} · Semester ${profile.current_semester}`
-            : "Welcome to UNIMIND — let's get you set up!"}
+            : "Welcome to UniMind — let's get you set up!"}
         </p>
       </div>
 
       {/* Summary cards */}
       <DashboardCards cards={cards} />
 
-      {/* Two column: upcoming tasks + falling behind */}
+      {/* Two column: upcoming tasks + overdue */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
         <UpcomingTasks tasks={upcoming} title="Upcoming" emptyMsg="You're all caught up! 🎉" />
         <UpcomingTasks tasks={overdue}  title="⚠️ Overdue" emptyMsg="Nothing overdue — great work!" isOverdue />

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,49 +28,67 @@ export default function LoginPage() {
     return Object.keys(e).length === 0;
   }
 
-async function handleLogin(ev: React.FormEvent<HTMLFormElement>) {
-  ev.preventDefault();
-  if (!validate()) return;
-  setLoading(true);
+  async function handleLogin(ev: React.FormEvent<HTMLFormElement>) {
+    ev.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email:    form.email,
-    password: form.password,
-    options: {
-      // If staySignedIn is false, session expires when browser closes
-    },
-  });
+    const { error } = await supabase.auth.signInWithPassword({
+      email:    form.email,
+      password: form.password,
+      options: {},
+    });
 
-  if (error) {
-    toast.error(error.message);
-    setLoading(false);
-    return;
+    if (error) {
+      toast.error(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (!staySignedIn) {
+      sessionStorage.setItem("unimind_session_only", "true");
+    } else {
+      sessionStorage.removeItem("unimind_session_only");
+    }
+
+    toast.success("Welcome back! 👋");
+    router.push("/dashboard");
+    router.refresh();
   }
-
-  // If NOT staying signed in, set a short expiry via localStorage flag
-  if (!staySignedIn) {
-    sessionStorage.setItem("unimind_session_only", "true");
-  } else {
-    sessionStorage.removeItem("unimind_session_only");
-  }
-
-  toast.success("Welcome back! 👋");
-  router.push("/dashboard");
-  router.refresh();
-}
 
   return (
-    <div className="animate-slide-up" style={{ width: "100%", maxWidth: "420px" }}>
-      <div className="clay-card" style={{ padding: "2.5rem" }}>
+    <motion.div
+      initial={{ opacity: 0, y: 30, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.6, type: "spring", stiffness: 90, damping: 18 }}
+      style={{ width: "100%", maxWidth: "420px" }}
+    >
+      <div className="glass-card" style={{ padding: "2.5rem" }}>
 
         {/* Header */}
         <div style={{ marginBottom: "2rem", textAlign: "center" }}>
-          <h1 style={{ fontSize: "1.625rem", fontWeight: 700, color: "#1c1917", marginBottom: "0.5rem" }}>
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.5 }}
+            style={{
+              fontSize: "1.625rem",
+              fontWeight: 700,
+              color: "var(--color-text-primary)",
+              marginBottom: "0.5rem",
+              fontFamily: "var(--font-display)",
+            }}
+          >
             Welcome back
-          </h1>
-          <p style={{ color: "#78716c", fontSize: "0.9rem" }}>
-            Sign in to your UNIMIND account
-          </p>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.25, duration: 0.5 }}
+            style={{ color: "var(--color-text-muted)", fontSize: "0.9rem" }}
+          >
+            Sign in to your UniMind account
+          </motion.p>
         </div>
 
         {/* Form */}
@@ -88,7 +107,14 @@ async function handleLogin(ev: React.FormEvent<HTMLFormElement>) {
               aria-describedby={errors.email ? "email-error" : undefined}
             />
             {errors.email && (
-              <p id="email-error" style={errorStyle}>{errors.email}</p>
+              <motion.p
+                id="email-error"
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={errorStyle}
+              >
+                {errors.email}
+              </motion.p>
             )}
           </div>
 
@@ -96,7 +122,15 @@ async function handleLogin(ev: React.FormEvent<HTMLFormElement>) {
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.375rem" }}>
               <label style={{ ...labelStyle, marginBottom: 0 }}>Password</label>
-              <Link href="/forgot-password" style={{ fontSize: "0.8rem", color: "var(--color-primary-600)", textDecoration: "none" }}>
+              <Link
+                href="/forgot-password"
+                style={{
+                  fontSize: "0.8rem",
+                  color: "var(--color-primary-300)",
+                  textDecoration: "none",
+                  transition: "color 0.2s",
+                }}
+              >
                 Forgot password?
               </Link>
             </div>
@@ -115,9 +149,16 @@ async function handleLogin(ev: React.FormEvent<HTMLFormElement>) {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
-                  position: "absolute", right: "0.875rem", top: "50%",
-                  transform: "translateY(-50%)", background: "none",
-                  border: "none", cursor: "pointer", color: "#a8a29e", padding: 0,
+                  position: "absolute",
+                  right: "0.875rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "var(--color-text-muted)",
+                  padding: 0,
+                  transition: "color 0.2s",
                 }}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -125,7 +166,14 @@ async function handleLogin(ev: React.FormEvent<HTMLFormElement>) {
               </button>
             </div>
             {errors.password && (
-              <p id="pw-error" style={errorStyle}>{errors.password}</p>
+              <motion.p
+                id="pw-error"
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={errorStyle}
+              >
+                {errors.password}
+              </motion.p>
             )}
           </div>
 
@@ -135,34 +183,43 @@ async function handleLogin(ev: React.FormEvent<HTMLFormElement>) {
               type="checkbox"
               checked={staySignedIn}
               onChange={(e) => setStaySignedIn(e.target.checked)}
-              style={{ width: "16px", height: "16px", accentColor: "var(--color-primary-600)" }}
+              style={{ width: "16px", height: "16px", accentColor: "var(--color-primary-500)" }}
             />
-            <span style={{ fontSize: "0.875rem", color: "#57534e" }}>Stay signed in</span>
+            <span style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)" }}>Stay signed in</span>
           </label>
 
           {/* Submit */}
-          <button
+          <motion.button
             type="submit"
             className="btn-primary"
             disabled={loading}
+            whileHover={{ scale: loading ? 1 : 1.02 }}
+            whileTap={{ scale: loading ? 1 : 0.98 }}
             style={{ width: "100%", padding: "0.75rem", marginTop: "0.5rem", fontSize: "0.9375rem" }}
           >
             {loading
               ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Signing in...</>
               : <><LogIn size={16} /> Sign In</>
             }
-          </button>
+          </motion.button>
         </form>
 
         {/* Register link */}
-        <p style={{ textAlign: "center", marginTop: "1.75rem", fontSize: "0.875rem", color: "#78716c" }}>
+        <p style={{ textAlign: "center", marginTop: "1.75rem", fontSize: "0.875rem", color: "var(--color-text-muted)" }}>
           Don&apos;t have an account?{" "}
-          <Link href="/register" style={{ color: "var(--color-primary-600)", fontWeight: 600, textDecoration: "none" }}>
+          <Link
+            href="/register"
+            style={{
+              color: "var(--color-primary-300)",
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
             Register here
           </Link>
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -170,7 +227,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "0.875rem",
   fontWeight: 500,
-  color: "#44403c",
+  color: "var(--color-text-secondary)",
   marginBottom: "0.375rem",
 };
 

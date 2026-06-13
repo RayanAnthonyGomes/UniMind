@@ -27,7 +27,7 @@ export default function MarkdownRenderer({ content, prose = true }: Props) {
           display: "flex", flexDirection: "column", gap: "0.375rem",
         }}>
           {items.map((item, i) => (
-            <li key={i} style={{ fontSize: "0.9rem", lineHeight: 1.7, color: "#1c1917" }}>
+            <li key={i} style={{ fontSize: "0.9rem", lineHeight: 1.7, color: "var(--color-text-primary)" }}>
               <InlineFormat text={item} />
             </li>
           ))}
@@ -42,7 +42,7 @@ export default function MarkdownRenderer({ content, prose = true }: Props) {
           listStyleType: "disc",
         }}>
           {items.map((item, i) => (
-            <li key={i} style={{ fontSize: "0.9rem", lineHeight: 1.7, color: "#1c1917" }}>
+            <li key={i} style={{ fontSize: "0.9rem", lineHeight: 1.7, color: "var(--color-text-primary)" }}>
               <InlineFormat text={item} />
             </li>
           ))}
@@ -101,7 +101,7 @@ export default function MarkdownRenderer({ content, prose = true }: Props) {
       result.push(
         <hr key={key()} style={{
           border: "none",
-          borderTop: "1px solid var(--color-surface-200)",
+          borderTop: "1px solid rgba(255, 255, 255, 0.1)",
           margin: "1rem 0",
         }} />
       );
@@ -113,10 +113,10 @@ export default function MarkdownRenderer({ content, prose = true }: Props) {
       flushList();
       result.push(
         <h2 key={key()} style={{
-          fontSize: "1.125rem", fontWeight: 700, color: "#1c1917",
+          fontSize: "1.125rem", fontWeight: 700, color: "var(--color-text-primary)",
           marginTop: "1.25rem", marginBottom: "0.375rem",
           paddingBottom: "0.375rem",
-          borderBottom: "2px solid var(--color-primary-100)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
         }}>
           <InlineFormat text={trimmed.slice(2)} />
         </h2>
@@ -129,7 +129,7 @@ export default function MarkdownRenderer({ content, prose = true }: Props) {
       flushList();
       result.push(
         <h3 key={key()} style={{
-          fontSize: "1rem", fontWeight: 700, color: "#1c1917",
+          fontSize: "1rem", fontWeight: 700, color: "var(--color-text-primary)",
           marginTop: "1rem", marginBottom: "0.25rem",
         }}>
           <InlineFormat text={trimmed.slice(3)} />
@@ -144,7 +144,7 @@ export default function MarkdownRenderer({ content, prose = true }: Props) {
       result.push(
         <h4 key={key()} style={{
           fontSize: "0.9375rem", fontWeight: 700,
-          color: "var(--color-primary-700)",
+          color: "var(--color-primary-400)",
           marginTop: "0.875rem", marginBottom: "0.25rem",
         }}>
           <InlineFormat text={trimmed.slice(4)} />
@@ -182,12 +182,15 @@ export default function MarkdownRenderer({ content, prose = true }: Props) {
       flushList();
       result.push(
         <blockquote key={key()} style={{
-          borderLeft: "3px solid var(--color-primary-300)",
+          borderLeft: "3px solid var(--color-primary-400)",
           paddingLeft: "1rem",
           margin: "0.625rem 0",
-          color: "#57534e",
+          color: "var(--color-text-secondary)",
           fontStyle: "italic",
           fontSize: "0.9rem",
+          background: "rgba(124, 58, 237, 0.05)",
+          padding: "0.5rem 1rem",
+          borderRadius: "0 8px 8px 0"
         }}>
           <InlineFormat text={trimmed.slice(2)} />
         </blockquote>
@@ -208,7 +211,7 @@ export default function MarkdownRenderer({ content, prose = true }: Props) {
       <p key={key()} style={{
         fontSize: "0.9rem",
         lineHeight: 1.75,
-        color: "#1c1917",
+        color: "var(--color-text-secondary)",
         margin: "0.25rem 0",
       }}>
         <InlineFormat text={trimmed} />
@@ -241,14 +244,14 @@ function InlineFormat({ text }: { text: string }) {
       {parts.map((part, i) => {
         if (part.startsWith("**") && part.endsWith("**")) {
           return (
-            <strong key={i} style={{ fontWeight: 700, color: "#1c1917" }}>
+            <strong key={i} style={{ fontWeight: 700, color: "var(--color-text-primary)" }}>
               {part.slice(2, -2)}
             </strong>
           );
         }
         if (part.startsWith("*") && part.endsWith("*") && !part.startsWith("**")) {
           return (
-            <em key={i} style={{ fontStyle: "italic", color: "#44403c" }}>
+            <em key={i} style={{ fontStyle: "italic", color: "var(--color-text-muted)" }}>
               {part.slice(1, -1)}
             </em>
           );
@@ -256,13 +259,14 @@ function InlineFormat({ text }: { text: string }) {
         if (part.startsWith("`") && part.endsWith("`")) {
           return (
             <code key={i} style={{
-              background: "var(--color-primary-50)",
-              color: "var(--color-primary-700)",
+              background: "rgba(124, 58, 237, 0.15)",
+              color: "var(--color-primary-300)",
               borderRadius: "4px",
               padding: "1px 6px",
               fontFamily: "JetBrains Mono, monospace",
               fontSize: "0.8125rem",
               fontWeight: 600,
+              border: "1px solid rgba(124, 58, 237, 0.3)"
             }}>
               {part.slice(1, -1)}
             </code>
@@ -273,7 +277,7 @@ function InlineFormat({ text }: { text: string }) {
         if (linkMatch) {
           return (
             <a key={i} href={linkMatch[2]} target="_blank" rel="noopener noreferrer"
-              style={{ color: "var(--color-primary-600)", textDecoration: "underline" }}>
+              style={{ color: "var(--color-primary-400)", textDecoration: "underline", textUnderlineOffset: "4px" }}>
               {linkMatch[1]}
             </a>
           );

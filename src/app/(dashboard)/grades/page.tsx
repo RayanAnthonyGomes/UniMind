@@ -28,17 +28,20 @@ export default async function GradesPage() {
   const gradesByCourse = (grades ?? []).reduce<Record<string, any>>(
     (acc, g) => { if (g) acc[g.course_id] = g; return acc; },
     {}
-  ); //copilot did smth here, not sure what it was but it seems to work fine
+  ); 
 
   return (
     <div className="animate-fade-in" style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
 
       {/* Header */}
       <div>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1c1917", marginBottom: "0.25rem" }}>
+        <h1 style={{
+          fontSize: "1.75rem", fontWeight: 700, color: "var(--color-text-primary)",
+          marginBottom: "0.25rem", fontFamily: "var(--font-display)", letterSpacing: "-0.03em"
+        }}>
           Grades & CGPA
         </h1>
-        <p style={{ color: "#78716c", fontSize: "0.9375rem" }}>
+        <p style={{ color: "var(--color-text-muted)", fontSize: "0.9375rem" }}>
           Track your academic performance across all courses
         </p>
       </div>
