@@ -333,17 +333,17 @@ export default function LectureReader({
       {summary.length > 0 && (
         <div className="clay-card" style={{
           padding: "1.75rem", marginBottom: "2rem",
-          background: "linear-gradient(135deg, var(--color-primary-50), #f0fdf4)",
-          border: "1px solid var(--color-primary-100)",
+          background: "linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.1))",
+          border: "1px solid rgba(124, 58, 237, 0.2)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem" }}>
             <div style={{
               width: "32px", height: "32px", borderRadius: "8px",
-              background: "var(--color-surface-50)",
+              background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
               display: "flex", alignItems: "center", justifyContent: "center",
               boxShadow: "var(--shadow-clay-sm)",
             }}>
-              <BookOpen size={16} style={{ color: "var(--color-primary-600)" }} />
+              <BookOpen size={16} style={{ color: "white" }} />
             </div>
             <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text-primary)" }}>
               Lecture Summary
@@ -355,14 +355,15 @@ export default function LectureReader({
               <div key={i} style={{
                 display: "flex", gap: "0.75rem", alignItems: "flex-start",
                 padding: "0.75rem 1rem",
-                background: "var(--color-surface-50)",
+                background: "rgba(255, 255, 255, 0.03)",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
                 borderRadius: "10px",
                 boxShadow: "var(--shadow-clay-sm)",
               }}>
                 <CheckCircle2 size={16} style={{
-                  color: "var(--color-primary-500)", flexShrink: 0, marginTop: "2px",
+                  color: "var(--color-primary-400)", flexShrink: 0, marginTop: "2px",
                 }} />
-                <p style={{ fontSize: "0.9rem", color: "#1c1917", lineHeight: 1.6 }}>
+                <p style={{ fontSize: "0.9rem", color: "var(--color-text-primary)", lineHeight: 1.6 }}>
                   {point}
                 </p>
               </div>

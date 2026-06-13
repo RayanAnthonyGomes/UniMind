@@ -57,10 +57,10 @@ export default function LectureList({
       toast.success("Lecture generated! A reading task was added too. 📚");
       setTopic("");
       setShowInput(false);
-      router.refresh();
 
       // Navigate to the new lecture
       router.push(`/courses/${course.id}/lectures/${data.lecture.id}`);
+      router.refresh();
 
     } catch {
       toast.error("Something went wrong. Please try again.");
