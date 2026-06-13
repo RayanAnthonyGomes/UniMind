@@ -164,7 +164,7 @@ export default function RegisterPage() {
           first_name: form.first_name.trim(),
           last_name:  form.last_name.trim(),
         },
-        emailRedirectTo: "https://unimind-omega.vercel.app/login",
+        emailRedirectTo: "https://unimind-omega.vercel.app/auth/callback?next=/login",
       },
     });
 
