@@ -2,7 +2,7 @@
 
 Welcome to **UniMind**, your intelligent, all-in-one academic companion! UniMind leverages cutting-edge AI to help university students manage their courses, understand complex materials, track grades, and stay on top of deadlines with interactive active recall.
 
-This project is a massive feature update ("Vamp Update") over the original repository, introducing `.docx` support, dynamic class logs, and an interactive 3D Flashcards system for studying.
+This project is a massive feature update ("Vamp Update") over the original repository, introducing `.docx` support and dynamic class logs system for studying.
 
 ---
 
@@ -12,7 +12,6 @@ This project is a massive feature update ("Vamp Update") over the original repos
 - **👁️ Vision AI Integration**: Upload photos of math problems or handwritten notes, and our Vision AI (Llama 4 Scout) will solve and explain them step-by-step.
 - **📚 Smart Course Management**: Track credits, semesters, and upload course materials directly to your dashboard.
 - **📄 Advanced Document Parsing**: Upload PDFs or `.docx` files. UniMind extracts the text and uses it to answer your questions and generate study materials.
-- **🗂️ Active Recall Flashcards**: Instantly convert any lecture into a deck of high-yield flashcards with 3D flip animations and spaced-repetition logic ("Still Learning" vs. "Got It!").
 - **📅 Class Logs & Timelines**: Tell the AI what you learned today, and it will automatically log it to your course timeline so you never lose track of syllabus pacing.
 - **📊 Grade & GPA Tracking**: Enter your quiz, midterm, and final marks. UniMind visualizes your semester GPA trends.
 - **✅ Task Management**: A built-in Kanban/List system for assignments and exams, complete with priority flags.
@@ -78,7 +77,6 @@ You will need to set up the following tables in your Supabase SQL editor:
 - `documents`
 - `lectures`
 - `class_logs`
-- `flashcards`
 
 _(Note: If you have `.sql` schema files included in the project like `flashcards_schema.sql` or `class_logs.sql`, simply copy and paste them into the Supabase SQL Editor and hit run to automatically create the tables and security policies)._
 
@@ -89,16 +87,6 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the app running!
-
----
-
-## 💡 How to Use the Flashcards Feature
-
-1. Navigate to a specific course in your Dashboard.
-2. Upload a document or create a lecture.
-3. Open the **Lecture Reader**.
-4. Scroll to the bottom and click **"Generate & Study Flashcards"**.
-5. The AI will instantly read the lecture, extract 10 high-yield concepts, and build a deck for you. Click the cards to flip them!
 
 ---
 
